@@ -67,6 +67,8 @@ class Parser(val lexer: Lexer, val file: File) {
                     }
 
                     TokenType.PAREN_LEFT -> {
+                        // todo this could be  probably a fall-through as well - function call is an expression
+                        // and this simplification could help when adding arrays for example (reduces duplicity)
                         return finishFuctionCall(identifier)
                     }
 
