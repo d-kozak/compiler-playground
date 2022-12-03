@@ -124,23 +124,40 @@ class Parser(val lexer: Lexer, val file: File) {
 
     private fun parseAddExpression(): ExpressionNode {
         var res = parseMultExpression()
-        // todo sub
-        while (lexer.match(TokenType.PLUS)) {
-            lexer.consume(TokenType.PLUS)
-            val right = parseMultExpression()
-            res = BinaryOpNode(res, BinaryOperation.ADDITION, right)
+        while (lexer.matchAny(TokenType.PLUS, TokenType.MINUS)) {
+            when {
+                lexer.matchAndEat(TokenType.PLUS) -> {
+                    val right = parseMultExpression()
+                    res = BinaryOpNode(res, BinaryOperation.ADDITION, right)
+                }
+
+                lexer.matchAndEat(TokenType.MINUS) -> {
+                    val right = parseMultExpression()
+                    res = BinaryOpNode(res, BinaryOperation.SUBTRACTION, right)
+                }
+            }
+
         }
         return res
     }
 
     private fun parseMultExpression(): ExpressionNode {
-        val left = parseInnerExpression()
-        val mid = lexer.peek()
-        // todo chain with for loop
-        when (mid.type) {
-            // todo mult , div
-            else -> return left
+        var res = parseInnerExpression()
+        while (lexer.matchAny(TokenType.MULT, TokenType.DIV)) {
+            when {
+                lexer.matchAndEat(TokenType.MULT) -> {
+                    val right = parseInnerExpression()
+                    res = BinaryOpNode(res, BinaryOperation.MULTIPLICATION, right)
+                }
+
+                lexer.matchAndEat(TokenType.DIV) -> {
+                    val right = parseInnerExpression()
+                    res = BinaryOpNode(res, BinaryOperation.DIVISION, right)
+                }
+            }
+
         }
+        return res
     }
 
 

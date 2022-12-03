@@ -2,7 +2,7 @@ import java.io.File
 
 
 fun main(args: Array<String>) {
-    val fileName = if (args.size == 1) args[0] else "programs/source/inc_input.prog"
+    val fileName = if (args.size == 1) args[0] else "programs/source/math.prog"
     val root = parseFile(fileName)
     println(root)
 }

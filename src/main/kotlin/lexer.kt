@@ -38,6 +38,19 @@ class Lexer(val input: String) {
         return peek().type == type
     }
 
+    fun matchAndEat(type: TokenType): Boolean {
+        if (match(type)) {
+            next()
+            return true
+        }
+        return false
+    }
+
+    fun matchAny(vararg types: TokenType): Boolean {
+        val current = peek().type
+        return types.any { it == current }
+    }
+
 
     private fun consume(): Token {
         while (hasText()) {
@@ -47,11 +60,18 @@ class Lexer(val input: String) {
                 '{' -> return produceToken(TokenType.BRACKET_LEFT)
                 '}' -> return produceToken(TokenType.BRACKET_RIGHT)
                 '+' -> return produceToken(TokenType.PLUS)
+                '-' -> return produceToken(TokenType.MINUS)
+                '*' -> return produceToken(TokenType.MULT)
+                '/' -> return produceToken(TokenType.DIV)
                 '=' -> return produceToken(TokenType.EQ)
                 ',' -> return produceToken(TokenType.COMMA)
                 in '1'..'9' -> return lexInt()
-                !in blanks -> return lexIdOrKeyword()
             }
+
+            if (input[pos].isJavaIdentifierStart()) return lexIdOrKeyword()
+
+            if (!(input[pos] in blanks)) syntaxError("Unrecognized token ${input[pos]}")
+
             if (input[pos++] == '\n') {
                 line++
                 lineStart = pos
@@ -117,6 +137,5 @@ class Lexer(val input: String) {
 
 
     fun currPos() = SourceLocation(line, pos - lineStart + 1)
-
 
 }

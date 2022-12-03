@@ -8,7 +8,16 @@ enum class TokenType {
     IDENTIFIER,
     INT_LITERAL,
     PLUS,
+    MINUS,
+    MULT,
+    DIV,
+    EQ_EQ,
+    LT,
+    LE,
+    GT,
+    GE,
     EQ,
+    NEQ,
     COMMA
 }
 

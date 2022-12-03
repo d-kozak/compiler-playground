@@ -15,8 +15,14 @@ class ParserTest {
     }
 
     @Test
-    fun `math operations`() {
+    fun `multiple adds`() {
         val root = parseFile(testFile(MULTIPLE_ADDS))
+        println(root)
+    }
+
+    @Test
+    fun `math operations`() {
+        val root = parseFile(testFile(MATH))
         println(root)
     }
 }

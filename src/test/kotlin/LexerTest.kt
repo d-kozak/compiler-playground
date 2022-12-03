@@ -6,7 +6,7 @@ class LexerTest {
 
 
     @Test
-    fun `lex the whole file`() {
+    fun `lex the whole multi adds file`() {
         val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
         while (lexer.hasText()) {
             println(lexer.next())
@@ -14,8 +14,17 @@ class LexerTest {
     }
 
     @Test
+    fun `lex the whole multi math file`() {
+        val lexer = Lexer(readFile(testFile(MATH)))
+        while (lexer.hasText()) {
+            val token = lexer.next()
+            println(token)
+        }
+    }
+
+    @Test
     fun `consume first few tokens`() {
-        val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
+        val lexer = Lexer(readFile(testFile(INC_INPUT)))
         lexer.consume(TokenType.KEYWORD_FUN)
         lexer.consume(TokenType.IDENTIFIER)
         lexer.consume(TokenType.PAREN_LEFT)
@@ -24,7 +33,7 @@ class LexerTest {
 
     @Test
     fun `match first few tokens`() {
-        val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
+        val lexer = Lexer(readFile(testFile(INC_INPUT)))
         check(lexer.match(TokenType.KEYWORD_FUN))
         lexer.consume(TokenType.KEYWORD_FUN)
         check(lexer.match(TokenType.IDENTIFIER))

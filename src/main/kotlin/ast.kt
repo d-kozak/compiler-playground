@@ -15,7 +15,10 @@ data class FunctionDeclarationNode(
 ) : TopLevelDeclaration()
 
 enum class BinaryOperation {
-    ADDITION
+    ADDITION,
+    SUBTRACTION,
+    MULTIPLICATION,
+    DIVISION
 }
 
 sealed class StatementNode
