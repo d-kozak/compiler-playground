@@ -1,6 +1,11 @@
 private val blanks = setOf(' ', '\n')
 
-private val keywords = mapOf("fun" to TokenType.KEYWORD_FUN, "return" to TokenType.KEYWORD_RETURN)
+private val keywords = mapOf(
+    "fun" to TokenType.KEYWORD_FUN,
+    "return" to TokenType.KEYWORD_RETURN,
+    "if" to TokenType.KEYWORD_IF,
+    "while" to TokenType.KEYWORD_WHILE,
+)
 
 class Lexer(val input: String) {
 
@@ -63,14 +68,38 @@ class Lexer(val input: String) {
                 '-' -> return produceToken(TokenType.MINUS)
                 '*' -> return produceToken(TokenType.MULT)
                 '/' -> return produceToken(TokenType.DIV)
-                '=' -> return produceToken(TokenType.EQ)
+                '=' -> {
+                    return if (pos + 1 < n && input[pos + 1] == '=')
+                        produceToken(TokenType.EQ_EQ, nextPos = pos + 2)
+                    else
+                        produceToken(TokenType.EQ)
+                }
+
                 ',' -> return produceToken(TokenType.COMMA)
-                in '1'..'9' -> return lexInt()
+                '!' -> {
+                    if (pos + 1 < n && input[pos + 1] == '=')
+                        return produceToken(TokenType.NEQ, nextPos = pos + 2)
+                }
+
+                '<' -> {
+                    return if (pos + 1 < n && input[pos + 1] == '=')
+                        produceToken(TokenType.LE, nextPos = pos + 2)
+                    else produceToken(TokenType.LT)
+                }
+
+                '>' -> {
+                    return if (pos + 1 < n && input[pos + 1] == '=')
+                        produceToken(TokenType.GE, nextPos = pos + 2)
+                    else produceToken(TokenType.GT)
+                }
+
+                in '0'..'9' -> return lexInt()
             }
 
             if (input[pos].isJavaIdentifierStart()) return lexIdOrKeyword()
 
-            if (!(input[pos] in blanks)) syntaxError("Unrecognized token ${input[pos]}")
+            if (!(input[pos] in blanks))
+                syntaxError("Unrecognized token ${input[pos]}")
 
             if (input[pos++] == '\n') {
                 line++

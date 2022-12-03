@@ -1,6 +1,8 @@
 enum class TokenType {
     KEYWORD_FUN,
     KEYWORD_RETURN,
+    KEYWORD_IF,
+    KEYWORD_WHILE,
     PAREN_LEFT,
     PAREN_RIGHT,
     BRACKET_LEFT,
@@ -11,12 +13,12 @@ enum class TokenType {
     MINUS,
     MULT,
     DIV,
-    EQ_EQ,
     LT,
     LE,
     GT,
     GE,
     EQ,
+    EQ_EQ,
     NEQ,
     COMMA
 }

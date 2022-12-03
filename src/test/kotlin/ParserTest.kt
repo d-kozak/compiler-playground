@@ -25,4 +25,11 @@ class ParserTest {
         val root = parseFile(testFile(MATH))
         println(root)
     }
+
+    @Test
+    fun `fib`() {
+        val root = parseFile(testFile(FIB))
+        println(root)
+    }
+
 }

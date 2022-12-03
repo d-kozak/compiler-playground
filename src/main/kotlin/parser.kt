@@ -92,6 +92,24 @@ class Parser(val lexer: Lexer, val file: File) {
                 return ReturnNode(expression)
             }
 
+            TokenType.KEYWORD_IF -> {
+                lexer.consume(TokenType.PAREN_LEFT)
+                val expression = parseExpression()
+                lexer.consume(TokenType.PAREN_RIGHT)
+                val thenStatement = parseBlock()
+                // todo if-else
+                return IfNode(expression, thenStatement)
+            }
+
+
+            TokenType.KEYWORD_WHILE -> {
+                lexer.consume(TokenType.PAREN_LEFT)
+                val expression = parseExpression()
+                lexer.consume(TokenType.PAREN_RIGHT)
+                val block = parseBlock()
+                return WhileNode(expression, block)
+            }
+
             else -> lexer.returnToken(start)
             // fallthrough, handle expression below lexer.syntaxError("Unexpected statement type, got $start", start)
         }
@@ -119,7 +137,44 @@ class Parser(val lexer: Lexer, val file: File) {
     }
 
     private fun parseExpression(): ExpressionNode {
-        return parseAddExpression()
+        return parseCmpExpression()
+    }
+
+
+    private fun parseCmpExpression(): ExpressionNode {
+        val left = parseAddExpression()
+        when {
+            lexer.matchAndEat(TokenType.EQ_EQ) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.EQUALS, right)
+            }
+
+            lexer.matchAndEat(TokenType.NEQ) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.NOT_EQUALS, right)
+            }
+
+            lexer.matchAndEat(TokenType.LT) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.LESS_THAN, right)
+            }
+
+            lexer.matchAndEat(TokenType.LE) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.LESS_OR_EQUAL, right)
+            }
+
+            lexer.matchAndEat(TokenType.GT) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.GREATER_THAN, right)
+            }
+
+            lexer.matchAndEat(TokenType.GE) -> {
+                val right = parseAddExpression()
+                return BinaryOpNode(left, BinaryOperation.GREATER_EQUAL, right)
+            }
+        }
+        return left
     }
 
     private fun parseAddExpression(): ExpressionNode {
