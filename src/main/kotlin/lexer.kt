@@ -1,38 +1,41 @@
 private val blanks = setOf(' ', '\n')
 
-private val keywords = mapOf("fun" to TokenType.KEYWORD_FUN)
+private val keywords = mapOf("fun" to TokenType.KEYWORD_FUN, "return" to TokenType.KEYWORD_RETURN)
 
 class Lexer(val input: String) {
 
     private var pos = 0
     private val n = input.length
-    private var curr: Token? = null
+    private val buffer = mutableListOf<Token>()
     private var line = 1
     private var lineStart = 0
+
+    fun peek(): Token {
+        if (buffer.isEmpty()) {
+            buffer.add(consume())
+        }
+        return buffer.last()
+    }
+
     fun next(): Token {
-        val tkn = curr
-        if (tkn != null) {
-            curr = null
-            return tkn
+        if (buffer.isNotEmpty()) {
+            return buffer.removeLast()
         }
         return consume()
     }
 
     fun consume(type: TokenType): Token {
-        var tkn = curr
-        if (tkn == null) {
-            tkn = consume()
-        }
-        check(tkn.type == type) { "Expected $type, got ${tkn}" }
-        curr = null
+        val tkn = if (buffer.isNotEmpty()) buffer.removeLast() else consume()
+        syntaxCheck(tkn.type == type, tkn) { "Expected $type, got $tkn" }
         return tkn
     }
 
+    fun returnToken(next: Token) {
+        buffer.add(next)
+    }
+
     fun match(type: TokenType): Boolean {
-        if (curr == null) {
-            curr = consume()
-        }
-        return curr!!.type == type
+        return peek().type == type
     }
 
 
@@ -45,6 +48,7 @@ class Lexer(val input: String) {
                 '}' -> return produceToken(TokenType.BRACKET_RIGHT)
                 '+' -> return produceToken(TokenType.PLUS)
                 '=' -> return produceToken(TokenType.EQ)
+                ',' -> return produceToken(TokenType.COMMA)
                 in '1'..'9' -> return lexInt()
                 !in blanks -> return lexIdOrKeyword()
             }
@@ -53,7 +57,28 @@ class Lexer(val input: String) {
                 lineStart = pos
             }
         }
-        error("Failed to produce token")
+        syntaxError("Failed to produce token")
+    }
+
+    private fun syntaxCheck(condition: Boolean, tkn: Token, lazyMsg: () -> String) {
+        if (!condition)
+            syntaxError(lazyMsg(), tkn)
+    }
+
+    fun syntaxError(msg: String, token: Token? = null): Nothing = throw SyntaxError(msg, context(token), currPos())
+
+    private fun context(token: Token?): String {
+        val loc = token?.location ?: currPos()
+        val lines = input.split('\n')
+        return buildString {
+            if (loc.line - 2 >= 0) appendLine(lines[loc.line - 2])
+            val wrongLine = lines[loc.line - 1]
+            appendLine(wrongLine)
+            val highlighter =
+                wrongLine.indices.map { if (it + 1 in loc.column) '^' else ' ' }.joinToString(separator = "")
+            appendLine(highlighter)
+            if (loc.line < lines.size) appendLine(lines[loc.line])
+        }
     }
 
     fun hasText(): Boolean {
@@ -89,5 +114,9 @@ class Lexer(val input: String) {
         val type = keywords[value] ?: TokenType.IDENTIFIER
         return produceToken(type, curr, value)
     }
+
+
+    fun currPos() = SourceLocation(line, pos - lineStart + 1)
+
 
 }

@@ -1,0 +1,11 @@
+
+
+fun call(){
+    a=1+1
+    b=2+2
+    c = 3+3
+}
+
+fun main(){
+    call()
+}

@@ -1,0 +1,27 @@
+fun add_two(a,b){
+    return a+b
+}
+
+fun add_three(a,b,c){
+    return a+b+c
+}
+
+fun add_four(a,b,c,d){
+    return a+b+c+d
+}
+
+fun mixed(a,b,c,d){
+    return add_two(a,b) + add_three(a,b,c)  + add_four(a,b,c,d)
+}
+
+fun empty(){}
+
+fun valueOnNextLineHowToEvaluate(){
+    return
+    1+1
+}
+
+fun main(){
+    res = mixed(1,2,3,4)
+    print(res)
+}

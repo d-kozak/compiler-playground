@@ -2,7 +2,7 @@
 
 fun main() {
     x = input()
-    print(x+1)
+    print(x+11)
 }
 
 

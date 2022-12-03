@@ -3,11 +3,11 @@ import kotlin.test.Test
 
 class LexerTest {
 
-    val INC_INPUT = "programs/source/inc_input.prog"
+
 
     @Test
     fun `lex the whole file`() {
-        val lexer = Lexer(readFile(INC_INPUT))
+        val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
         while (lexer.hasText()) {
             println(lexer.next())
         }
@@ -15,7 +15,7 @@ class LexerTest {
 
     @Test
     fun `consume first few tokens`() {
-        val lexer = Lexer(readFile(INC_INPUT))
+        val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
         lexer.consume(TokenType.KEYWORD_FUN)
         lexer.consume(TokenType.IDENTIFIER)
         lexer.consume(TokenType.PAREN_LEFT)
@@ -24,7 +24,7 @@ class LexerTest {
 
     @Test
     fun `match first few tokens`() {
-        val lexer = Lexer(readFile(INC_INPUT))
+        val lexer = Lexer(readFile(testFile(MULTIPLE_ADDS)))
         check(lexer.match(TokenType.KEYWORD_FUN))
         lexer.consume(TokenType.KEYWORD_FUN)
         check(lexer.match(TokenType.IDENTIFIER))
