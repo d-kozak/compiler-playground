@@ -25,12 +25,12 @@ I've just implemented enough lexing and parsing to parse the [fibonacci example]
 Now I am considering what to do next.
 
 ## Next steps
--[ ] IR - Transform the AST into more low level IR on which basic optimization passes can be implemented.
--[ ] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
+- [ ] IR - Transform the AST into more low level IR on which basic optimization passes can be implemented.
+- [ ] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
  interpretation/compilation. And also for fun :) I could of course do an AST interepreter, but I've already implemented some in the past, so I would rather try something new.
--[ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a bytecode interpreter. 
+- [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a bytecode interpreter. 
 I'm interested in the performance differences compared to the IR interpreter.
 
 ## Other Ideas and Side Tasks
--[ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on later
+- [ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on later
  stages of compilation.
