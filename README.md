@@ -21,8 +21,8 @@ right now. It is a fairly minimal subset of C with:
 
 ## Current status
 
-I've just implemented enough lexing and parsing to parse the [fibonacci example](./programs/source/fib.prog) into AST.
-Now I am considering what to do next.
+I've implemented enough infrastructure to parse the [fibonacci example](./programs/source/fib.prog) into AST,
+transform it to lower level IR and interpret it. Now I am considering what to do next.
 
 ## Next steps
 
@@ -30,6 +30,9 @@ Now I am considering what to do next.
 - [x] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
   interpretation/compilation. And also for fun :) I could of course do an AST interepreter, but I've already implemented
   some in the past, so I would rather try something new.
+- [ ] Control flow analysis - Extract basic blocks and create control-flow-graphs. Will be useful both for optimizations
+  and visualizations.
+- [ ] Graph visualizations for the CFG
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
@@ -37,6 +40,8 @@ Now I am considering what to do next.
 
 ## Other Ideas and Side Tasks
 
+- [ ] Restructure main and provide proper option hadling for various modes of the compiler.
+- [ ] Command line build command and launcher.
 - [ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on
   later
   stages of compilation.
