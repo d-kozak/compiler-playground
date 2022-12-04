@@ -1,12 +1,12 @@
 import BinaryOperation.*
 
-class NameGen {
-    val sink = Identifier("SINK")
+class NameGen(val prefix: String = "\$") {
+    val sink = Identifier("${prefix}SINK")
 
     var curr = 'a'
 
     fun next(): Identifier {
-        return Identifier("${curr++}\$gen")
+        return Identifier("$prefix${curr++}")
     }
 
 }
@@ -15,8 +15,7 @@ class NameGen {
 fun compile(file: FunctionDeclarationNode): IrFunction {
     val scope = CompilationScope(file)
     scope.doCompile()
-    // todo fix jump targets
-    // last jump goes out of irList in fib.main
+    scope.fixJumpTargets()
     return IrFunction(file.name, scope.instructions)
 }
 
@@ -58,7 +57,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
         instructions.add(condition)
 
         compileStatements(statement.body)
-        instructions.add(Jump(condStartIndex))
+        instructions.add(DirectJump(condStartIndex))
         condition.targetIndex = instructions.size
     }
 
@@ -71,7 +70,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
 
         compileStatements(statement.thenStatement)
 
-        instructions.add(Jump(instructions.size + 1)) // add an explicit jump at the end of basic block
+        instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of basic block
         condition.targetIndex = instructions.size
 
     }
@@ -133,6 +132,21 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
         instructions.add(instr)
     }
 
+    fun fixJumpTargets() {
+        val labelGen = NameGen("label_")
+        for (instruction in instructions.toList()) {
+            if (instruction is JumpInstruction) {
+                // if the jumps lead to end of functions, there is no corresponding instruction to jump to
+                // for now, insert noop there as a jump target
+                while (instruction.targetIndex >= instructions.size) {
+                    instructions.add(Noop())
+                }
+                instruction.target = instructions[instruction.targetIndex]
+                if (instruction.target.label == null)
+                    instruction.target.label = labelGen.next()
+            }
+        }
+    }
 }
 
 

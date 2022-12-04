@@ -96,7 +96,7 @@ class Lexer(val input: String) {
                 in '0'..'9' -> return lexInt()
             }
 
-            if (input[pos].isJavaIdentifierStart()) return lexIdOrKeyword()
+            if (input[pos].isLetter()) return lexIdOrKeyword()
 
             if (!(input[pos] in blanks))
                 syntaxError("Unrecognized token ${input[pos]}")
