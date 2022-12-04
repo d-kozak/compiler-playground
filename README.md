@@ -42,8 +42,11 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 
 - [ ] Restructure main and provide proper option hadling for various modes of the compiler.
 - [ ] Command line build command and launcher.
+- [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
+  But make sure it is as loosely coupled with the actual compiler and language as possible,
+  because anything from internal representation all the way to the syntax can change.
 - [ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on
   later
   stages of compilation.
 - [ ] Minimize the amount of boolean instructions for comparisons. Currently, I have all of them, but it is of course
-  not necessary. I could choose a minimal subset and convert the others to it.
+  not necessary. I could choose a minimal subset and convert the others to it. 
