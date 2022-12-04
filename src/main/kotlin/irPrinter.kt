@@ -52,7 +52,7 @@ private class PrintingScope(val func: IrFunction) {
                 is DirectJump -> appendInstruction(inst.name, inst.target.label!!)
                 is CondJump -> appendInstruction(inst.name, inst.condition, inst.target.label!!)
 
-                is JumpInstruction -> error("Should never get here, covered by the jumps above")
+                is JumpInstruction -> internalError("Should never get here, covered by the jumps above")
             }
         }
     }

@@ -4,10 +4,13 @@ import java.io.File
 fun main(args: Array<String>) {
     val fileName = if (args.size == 1) args[0] else "programs/source/fib.prog"
     val root = parseFile(fileName)
+    val irFunctions = mutableListOf<IrFunction>()
     for (decl in root.declarations) {
         val ir = compile(decl as FunctionDeclarationNode)
         printInstructions(ir)
+        irFunctions.add(ir)
     }
+    interpretIr(irFunctions)
 }
 
 fun parseFile(fileName: String): FileContentNode {

@@ -16,7 +16,7 @@ fun compile(file: FunctionDeclarationNode): IrFunction {
     val scope = CompilationScope(file)
     scope.doCompile()
     scope.fixJumpTargets()
-    return IrFunction(file.name, scope.instructions)
+    return IrFunction(file.name, file.parameters, scope.instructions)
 }
 
 class CompilationScope(private val file: FunctionDeclarationNode) {

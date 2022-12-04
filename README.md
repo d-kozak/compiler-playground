@@ -27,12 +27,13 @@ Now I am considering what to do next.
 ## Next steps
 
 - [x] IR - Transform the AST into more low level IR on which basic optimization passes can be implemented.
-- [ ] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
+- [x] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
   interpretation/compilation. And also for fun :) I could of course do an AST interepreter, but I've already implemented
   some in the past, so I would rather try something new.
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
+- [ ] Semantic analysis - At least differentiate void and int functions.
 
 ## Other Ideas and Side Tasks
 
