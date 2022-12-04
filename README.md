@@ -45,6 +45,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,
   because anything from internal representation all the way to the syntax can change.
+- [ ] Support for arrays. Once arrays are in place, basic algorithms can be written as test programs :)
 - [ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on
   later
   stages of compilation.
