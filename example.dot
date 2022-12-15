@@ -1,0 +1,11 @@
+digraph graphname {
+    a[label="
+push a
+pop
+inc x
+add x,y"];
+
+    a -> b;
+    b -> d;
+    b-> c;
+}
