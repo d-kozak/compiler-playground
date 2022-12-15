@@ -10,6 +10,11 @@ fun main(args: Array<String>) {
         printInstructions(ir)
         irFunctions.add(ir)
     }
+    for (irFunction in irFunctions) {
+        val cfg = computeCfg(irFunction)
+        val str = printCfg(cfg)
+        println(str)
+    }
     interpretIr(irFunctions)
 }
 

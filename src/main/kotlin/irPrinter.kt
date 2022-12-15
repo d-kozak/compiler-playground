@@ -1,17 +1,26 @@
 fun printInstructions(func: IrFunction) {
-    val scope = PrintingScope(func)
-    scope.process()
+    val scope = PrintingScope()
+    scope.process(func)
     println(scope.toString())
 }
 
+fun dumpBasicBlock(basicBlock: BasicBlock): String {
+    val scope = PrintingScope()
+    scope.dumpInstructions(basicBlock.instructions)
+    return scope.toString()
+}
 
-private class PrintingScope(val func: IrFunction) {
+private class PrintingScope {
 
     val buffer = StringBuffer()
 
-    fun process() {
+    fun process(func:IrFunction) {
         appendLabel(func.name)
-        for (inst in func.instructions) {
+        dumpInstructions(func.instructions)
+    }
+
+    fun dumpInstructions(instructions: List<Instruction>) {
+        for (inst in instructions) {
             val label = inst.label
             if (label != null) {
                 appendLabel(label)

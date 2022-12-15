@@ -1,0 +1,55 @@
+digraph fib {
+
+a[label="
+	MOV $b x
+	MOVC $c 0
+	EQ $a $b $c
+	NOT $d $a
+	CJMP $d label_a
+"];
+b[label="
+	MOVC $e 0
+	RET $e
+"];
+c[label="
+	JMP label_a
+"];
+d[label="
+"];
+e[label="
+label_a:
+	MOV $g x
+	MOVC $h 1
+	EQ $f $g $h
+	NOT $i $f
+	CJMP $i label_b
+"];
+f[label="
+	MOVC $j 1
+	RET $j
+"];
+g[label="
+	JMP label_b
+"];
+h[label="
+"];
+i[label="
+label_b:
+	MOV $n x
+	MOVC $o 1
+	SUB $m $n $o
+	CALL $l fib $m
+	MOV $r x
+	MOVC $s 2
+	SUB $q $r $s
+	CALL $p fib $q
+	ADD $k $l $p
+	RET $k
+"];
+
+a -> e
+c -> e
+e -> i
+g -> i
+}
+
