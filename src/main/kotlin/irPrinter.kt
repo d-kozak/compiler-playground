@@ -6,7 +6,7 @@ fun dumpInstructions(func: IrFunction): String {
 
 fun dumpBasicBlock(basicBlock: BasicBlock): String {
     val scope = PrintingScope()
-    scope.dumpInstructions(basicBlock.instructions, true)
+    scope.dumpInstructions(basicBlock.instructions.toTypedArray(), true)
     return scope.toString()
 }
 
@@ -19,7 +19,7 @@ private class PrintingScope {
         dumpInstructions(func.instructions, true)
     }
 
-    fun dumpInstructions(instructions: List<Instruction>, dumpLabels: Boolean) {
+    fun dumpInstructions(instructions: Array<Instruction>, dumpLabels: Boolean) {
         for (inst in instructions) {
             val label = inst.label
             if (dumpLabels && label != null) {

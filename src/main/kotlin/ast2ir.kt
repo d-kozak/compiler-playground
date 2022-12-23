@@ -16,7 +16,7 @@ fun compile(file: FunctionDeclarationNode): IrFunction {
     val scope = CompilationScope(file)
     scope.doCompile()
     scope.fixJumpTargets()
-    return IrFunction(file.name, file.parameters, scope.instructions)
+    return IrFunction(file.name, file.parameters, scope.instructions.toTypedArray())
 }
 
 class CompilationScope(private val file: FunctionDeclarationNode) {
@@ -143,6 +143,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
                     instructions.add(Noop())
                 }
                 instruction.target = instructions[instruction.targetIndex]
+                instructions[instruction.targetIndex].jumpedFrom = instruction
                 if (instruction.target.label == null)
                     instruction.target.label = labelGen.next()
             }

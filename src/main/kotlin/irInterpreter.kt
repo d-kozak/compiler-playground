@@ -47,7 +47,7 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
         return res
     }
 
-    private fun execute(instructions: List<Instruction>): Int? {
+    private fun execute(instructions: Array<Instruction>): Int? {
         var i = 0
         while (i < instructions.size) {
             when (val inst = instructions[i]) {

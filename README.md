@@ -33,6 +33,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Control flow analysis - Extract basic blocks and create control-flow-graphs. Will be useful both for optimizations
   and visualizations.
 - [x] Graph visualizations for the CFG
+- [x] Introduce optimization passes.
+- [ ] Figure out how to output and debug optimization passes so that the output does not get out of hands.
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
