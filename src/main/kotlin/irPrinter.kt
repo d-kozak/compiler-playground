@@ -6,7 +6,7 @@ fun dumpInstructions(func: IrFunction): String {
 
 fun dumpBasicBlock(basicBlock: BasicBlock): String {
     val scope = PrintingScope()
-    scope.dumpInstructions(basicBlock.instructions)
+    scope.dumpInstructions(basicBlock.instructions, true)
     return scope.toString()
 }
 
@@ -16,55 +16,119 @@ private class PrintingScope {
 
     fun process(func: IrFunction) {
         appendLabel(func.name)
-        dumpInstructions(func.instructions)
+        dumpInstructions(func.instructions, true)
     }
 
-    fun dumpInstructions(instructions: List<Instruction>) {
+    fun dumpInstructions(instructions: List<Instruction>, dumpLabels: Boolean) {
         for (inst in instructions) {
             val label = inst.label
-            if (label != null) {
+            if (dumpLabels && label != null) {
                 appendLabel(label)
             }
             when (inst) {
-                is Add -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Sub -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Mult -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Div -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
+                is BinaryInstruction -> appendBinaryInstruction(inst)
 
-                is Eq -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Neq -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
+                is Not -> appendNot(inst)
+                is Noop -> appendNoop(inst)
 
-                is Ge -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Gt -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Le -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
-                is Lt -> appendInstruction(inst.name, inst.target, inst.left, inst.right)
+                is Move -> appendMove(inst)
+                is MoveConst -> appendMoveConst(inst)
 
-                is Not -> appendInstruction(inst.name, inst.target, inst.source)
-                is Noop -> appendInstruction(inst.name)
+                is FunctionCall -> appendFunctionCall(inst)
 
-                is Move -> appendInstruction(inst.name, inst.target, inst.source)
-                is MoveConst -> appendInstruction(inst.name, inst.target, inst.constant.asId())
-
-                is FunctionCall -> appendInstruction(
-                    inst.name,
-                    inst.target,
-                    inst.functionName,
-                    *inst.args.toTypedArray()
-                )
-
-                is Ret -> {
-                    val value = inst.value
-                    if (value != null) appendInstruction(inst.name, value) else appendInstruction(inst.name)
-                }
+                is Ret -> appendRet(inst)
 
 
-                is DirectJump -> appendInstruction(inst.name, inst.target.label!!)
-                is CondJump -> appendInstruction(inst.name, inst.condition, inst.target.label!!)
+                is DirectJump -> appendDirectJump(inst)
+                is CondJump -> appendConditionalJump(inst)
 
-                is JumpInstruction -> internalError("Should never get here, covered by the jumps above")
+                else -> internalError("Should never get here") // special method for non-exhaustive when?
             }
         }
     }
+
+    private fun appendConditionalJump(inst: CondJump) {
+        buffer.append('\t')
+            .append("COND JUMP ")
+            .append(inst.condition)
+            .append(' ')
+            .appendLine(inst.target.label!!.name)
+    }
+
+    private fun appendDirectJump(inst: DirectJump) {
+        buffer.append('\t')
+            .append("JUMP ")
+            .appendLine(inst.target.label!!.name)
+    }
+
+    private fun appendRet(inst: Ret) {
+        buffer.append('\t')
+            .append("return ")
+        val value = inst.value
+        if (value != null) {
+            buffer.append(value)
+        }
+        buffer.appendLine()
+    }
+
+    private fun appendFunctionCall(inst: FunctionCall) {
+        appendTarget(inst.target)
+            .append(inst.functionName)
+            .append('(')
+        for ((i, arg) in inst.args.withIndex()) {
+            if (i > 0) buffer.append(", ")
+            buffer.append(arg)
+        }
+        buffer.appendLine(')')
+    }
+
+    private fun appendMoveConst(inst: MoveConst) {
+        appendTarget(inst.target)
+            .appendLine(inst.constant.value.toString())
+    }
+
+    private fun appendMove(inst: Move) {
+        appendTarget(inst.target)
+            .appendLine(inst.source.toString())
+    }
+
+
+    private fun appendNoop(inst: Noop) {
+        buffer.append('\t')
+            .appendLine(inst.name)
+    }
+
+    private fun appendNot(inst: Not) {
+        appendTarget(inst.target)
+            .append('!')
+            .appendLine(inst.source.toString())
+    }
+
+    private fun appendBinaryInstruction(inst: BinaryInstruction) {
+        val op = when (inst) {
+            is Add -> BinaryOperation.ADDITION
+            is Sub -> BinaryOperation.SUBTRACTION
+            is Mult -> BinaryOperation.MULTIPLICATION
+            is Div -> BinaryOperation.DIVISION
+            is Eq -> BinaryOperation.EQUALS
+            is Neq -> BinaryOperation.NOT_EQUALS
+            is Lt -> BinaryOperation.LESS_THAN
+            is Le -> BinaryOperation.LESS_OR_EQUAL
+            is Ge -> BinaryOperation.GREATER_EQUAL
+            is Gt -> BinaryOperation.GREATER_THAN
+            else -> internalError("bad op $inst")
+        }
+        appendTarget(inst.target)
+            .append(inst.left)
+            .append(' ')
+            .append(op.symbol)
+            .append(' ')
+            .appendLine(inst.right.toString())
+    }
+
+    private fun appendTarget(identifier: Identifier): StringBuffer = buffer.append('\t')
+        .append(identifier)
+        .append(" = ")
 
     private fun appendLabel(id: Identifier) {
         buffer.append(id.name)
@@ -72,15 +136,6 @@ private class PrintingScope {
 
     }
 
-    private fun appendInstruction(name: String, vararg args: Identifier) {
-        buffer.append('\t')
-            .append(name)
-        for (arg in args) {
-            buffer.append(' ')
-                .append(arg.name)
-        }
-        buffer.appendLine()
-    }
 
     override fun toString(): String {
         return buffer.toString()

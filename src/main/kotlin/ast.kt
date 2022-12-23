@@ -18,23 +18,24 @@ data class FunctionDeclarationNode(
     val statements: List<StatementNode>
 ) : TopLevelDeclaration()
 
-enum class BinaryOperation {
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    EQUALS,
-    NOT_EQUALS,
-    LESS_THAN,
-    LESS_OR_EQUAL,
-    GREATER_THAN,
-    GREATER_EQUAL
+enum class BinaryOperation(val symbol: String) {
+    ADDITION("+"),
+    SUBTRACTION("-"),
+    MULTIPLICATION("*"),
+    DIVISION("/"),
+    EQUALS("=="),
+    NOT_EQUALS(" !="),
+    LESS_THAN("<"),
+    LESS_OR_EQUAL("<="),
+    GREATER_THAN(">"),
+    GREATER_EQUAL(">=")
 }
 
 sealed class StatementNode
 data class AssignmentNode(val variable: Identifier, val expression: ExpressionNode) : StatementNode()
 data class ReturnNode(val expression: ExpressionNode?) : StatementNode()
 
+// todo if else
 data class IfNode(val condition: ExpressionNode, val thenStatement: List<StatementNode>) : StatementNode()
 data class WhileNode(val condition: ExpressionNode, val body: List<StatementNode>) : StatementNode()
 
