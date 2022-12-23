@@ -1,7 +1,7 @@
-fun printInstructions(func: IrFunction) {
+fun dumpInstructions(func: IrFunction): String {
     val scope = PrintingScope()
     scope.process(func)
-    println(scope.toString())
+    return scope.toString()
 }
 
 fun dumpBasicBlock(basicBlock: BasicBlock): String {
@@ -14,7 +14,7 @@ private class PrintingScope {
 
     val buffer = StringBuffer()
 
-    fun process(func:IrFunction) {
+    fun process(func: IrFunction) {
         appendLabel(func.name)
         dumpInstructions(func.instructions)
     }

@@ -70,7 +70,8 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
 
         compileStatements(statement.thenStatement)
 
-        instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of basic block
+        if (instructions.last() !is Ret)
+            instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of basic block
         condition.targetIndex = instructions.size
 
     }

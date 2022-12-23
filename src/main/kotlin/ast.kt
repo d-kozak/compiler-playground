@@ -4,7 +4,10 @@ import java.io.File
 
 data class FileContentNode(val file: File, val declarations: List<TopLevelDeclaration>)
 
-data class Identifier(val name: String)
+data class Identifier(val name: String) {
+    override fun toString(): String = name
+}
+
 data class IntConstant(val value: Int)
 
 

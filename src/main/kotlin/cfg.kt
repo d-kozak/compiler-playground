@@ -29,7 +29,7 @@ fun printCfg(cfg: ControlFlowGraph): String = buildString {
 
     appendLine()
 
-    for ((from,successors) in cfg.successors.entries) {
+    for ((from, successors) in cfg.successors.entries) {
         for (successor in successors) {
             append(blockNames[from])
             append(" -> ")
@@ -42,6 +42,7 @@ fun printCfg(cfg: ControlFlowGraph): String = buildString {
     appendLine()
 }
 
+// todo id
 data class BasicBlock(
     val instructions: MutableList<Instruction> = mutableListOf()
 )
@@ -56,7 +57,7 @@ data class ControlFlowGraph(
         val curr = mutableListOf<Instruction>()
         for (instruction in function.instructions) {
             var processed = false
-            if (instruction.label != null) {
+            if (instruction.label != null && curr.isNotEmpty()) {
                 newBasicBlock(curr)
                 curr.clear()
                 curr.add(instruction)
@@ -78,6 +79,7 @@ data class ControlFlowGraph(
     }
 
     private fun newBasicBlock(curr: MutableList<Instruction>) {
+        require(curr.isNotEmpty())
         val block = BasicBlock(curr.toMutableList())
         basicBlocks.add(block)
         for (instruction in curr) {
@@ -86,13 +88,26 @@ data class ControlFlowGraph(
     }
 
     fun findJumpTargets() {
-        for (instruction in function.instructions) {
+        for ((i, instruction) in function.instructions.withIndex()) {
+            val sourceBlock = instructionToBlock[instruction]!!
+            if (i + 1 < function.instructions.size) {
+                val next = instructionToBlock[function.instructions[i + 1]]!!
+                if (sourceBlock != next && instruction !is JumpInstruction) {
+                    val l = successors[sourceBlock] ?: mutableListOf()
+                    l.add(next)
+                    successors[sourceBlock] = l
+                }
+            }
             if (instruction is JumpInstruction) {
-                val sourceBlock = instructionToBlock[instruction]!!
                 val targetBlock = instructionToBlock[instruction.target]!!
                 val l = successors[sourceBlock] ?: mutableListOf()
                 l.add(targetBlock)
                 successors[sourceBlock] = l
+
+                if (instruction is CondJump) {
+                    val nextBlock = instructionToBlock[function.instructions[i + 1]]!!
+                    l.add(nextBlock)
+                }
             }
         }
     }
