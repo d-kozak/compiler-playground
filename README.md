@@ -30,9 +30,9 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] IR interpreter - Write an interpreter for the IR - mainly for performance comparisons with other forms of
   interpretation/compilation. And also for fun :) I could of course do an AST interepreter, but I've already implemented
   some in the past, so I would rather try something new.
-- [ ] Control flow analysis - Extract basic blocks and create control-flow-graphs. Will be useful both for optimizations
+- [x] Control flow analysis - Extract basic blocks and create control-flow-graphs. Will be useful both for optimizations
   and visualizations.
-- [ ] Graph visualizations for the CFG
+- [x] Graph visualizations for the CFG
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
@@ -40,7 +40,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 
 ## Other Ideas and Side Tasks
 
-- [ ] Restructure main and provide proper option hadling for various modes of the compiler.
+- [ ] Restructure main and provide proper option handling for various modes of the compiler.
 - [ ] Command line build command and launcher.
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,
