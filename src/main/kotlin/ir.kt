@@ -8,6 +8,10 @@ sealed class Instruction(var name: String) {
         this.jumpedFrom!!.target = this
     }
 
+    /**
+     * @see passes.basicblock.LiveVariableAnalysis
+     */
+    var isLive: Boolean = false
     var jumpedFrom: JumpInstruction? = null
         set(value) {
             require(this.jumpedFrom == null) { "assuming only a single jump target (for now)" }
@@ -19,7 +23,7 @@ sealed class Instruction(var name: String) {
 
     /**
      * Index into the the instruction array
-     * @see setInstructionIndexes
+     * @see passes.setInstructionIndexes
      */
     var index: Int = -1
 }
@@ -33,6 +37,7 @@ interface BinaryInstruction {
 
     fun negate(): Instruction
 }
+
 class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")
 class Add(
