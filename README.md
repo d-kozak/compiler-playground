@@ -43,9 +43,9 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 
 ## Other Ideas and Side Tasks
 
-- [ ] Support for constants directly in the IR. The extra variables like $i = 1 just for $j = $k + $i are not necessary
+- [x] Support for constants directly in the IR. The extra variables like $i = 1 just for $j = $k + $i are not necessary
   make the code longer
-- [ ] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
+- [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
 - [ ] Restructure main and provide proper option handling for various modes of the compiler.
 - [ ] Command line build command and launcher.
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
