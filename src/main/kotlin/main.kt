@@ -1,6 +1,6 @@
-import passes.OptimizationPass
 import passes.RemoveNoopPass
 import passes.SimplifyJumpConditions
+import passes.basicblock.DirectConstantPropagationPass
 import passes.setInstructionIndexes
 import java.io.File
 import java.io.FileWriter
@@ -14,7 +14,8 @@ inline fun dumpTo(fileName: String, block: FileWriter.() -> Unit) {
     FileWriter(dumpDir.toFile()).use(block)
 }
 
-val passes = listOf<OptimizationPass>(SimplifyJumpConditions(), RemoveNoopPass())
+val passes = listOf(SimplifyJumpConditions(), RemoveNoopPass())
+val basicBlockPasses = listOf(DirectConstantPropagationPass())
 fun main(args: Array<String>) {
     val fileName = if (args.size == 1) args[0] else "programs/source/fib.prog"
     val root = parseFile(fileName)
@@ -40,9 +41,18 @@ fun main(args: Array<String>) {
 
     for (irFunction in irFunctions) {
         val cfg = computeCfg(irFunction)
+
+
         val str = printCfg(cfg)
         println(str)
         dumpTo("${irFunction.name}.cfg") { write(str) }
+
+        for (pass in basicBlockPasses) {
+            for (block in cfg.basicBlocks) {
+                pass.apply(block)
+            }
+            dumpTo("${irFunction.name}.cfg_after_${pass.javaClass.name}") { write(printCfg(cfg)) }
+        }
     }
     interpretIr(irFunctions)
 }

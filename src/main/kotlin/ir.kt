@@ -26,8 +26,8 @@ sealed class Instruction(var name: String) {
 
 interface BinaryInstruction {
     val target: Identifier
-    val left: IdentifierOrValue
-    val right: IdentifierOrValue
+    var left: IdentifierOrValue
+    var right: IdentifierOrValue
 
     fun canNegate(): Boolean
 
@@ -35,12 +35,12 @@ interface BinaryInstruction {
 }
 
 class MoveConst(val target: Identifier, val constant: IntConstant) : Instruction("MOVC")
-class Move(val target: Identifier, val source: Identifier) : Instruction("MOV")
+class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")
 class Add(
     override val target: Identifier,
-    override val left: IdentifierOrValue,
-    override val right: IdentifierOrValue
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
 ) :
     Instruction("ADD"),
     BinaryInstruction {
@@ -51,8 +51,8 @@ class Add(
 
 class Sub(
     override val target: Identifier,
-    override val left: IdentifierOrValue,
-    override val right: IdentifierOrValue
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
 ) :
     Instruction("SUB"),
     BinaryInstruction {
@@ -65,8 +65,8 @@ class Sub(
 
 class Mult(
     override val target: Identifier,
-    override val left: IdentifierOrValue,
-    override val right: IdentifierOrValue
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
 ) :
     Instruction("MULT"),
     BinaryInstruction {
@@ -78,8 +78,8 @@ class Mult(
 
 class Div(
     override val target: Identifier,
-    override val left: IdentifierOrValue,
-    override val right: IdentifierOrValue
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
 ) :
     Instruction("DIV"), BinaryInstruction {
 
@@ -88,7 +88,7 @@ class Div(
     override fun negate() = internalError("cannot negate")
 }
 
-class Eq(override val target: Identifier, override val left: IdentifierOrValue, override val right: IdentifierOrValue) :
+class Eq(override val target: Identifier, override var left: IdentifierOrValue, override var right: IdentifierOrValue) :
     Instruction("EQ"),
     BinaryInstruction {
 
@@ -100,8 +100,8 @@ class Eq(override val target: Identifier, override val left: IdentifierOrValue, 
 
 class Neq(
     override val target: Identifier,
-    override val left: IdentifierOrValue,
-    override val right: IdentifierOrValue
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
 ) :
     Instruction("NEQ"),
     BinaryInstruction {
@@ -111,14 +111,14 @@ class Neq(
     override fun negate() = Eq(target, left, right).also { it.copyLabel(this) }
 }
 
-class Lt(override val target: Identifier, override val left: IdentifierOrValue, override val right: IdentifierOrValue) :
+class Lt(override val target: Identifier, override var left: IdentifierOrValue, override var right: IdentifierOrValue) :
     Instruction("LT"), BinaryInstruction {
     override fun canNegate(): Boolean = true
 
     override fun negate() = Ge(target, left, right).also { it.copyLabel(this) }
 }
 
-class Le(override val target: Identifier, override val left: IdentifierOrValue, override val right: IdentifierOrValue) :
+class Le(override val target: Identifier, override var left: IdentifierOrValue, override var right: IdentifierOrValue) :
     Instruction("LE"),
     BinaryInstruction {
     override fun canNegate(): Boolean = true
@@ -126,7 +126,7 @@ class Le(override val target: Identifier, override val left: IdentifierOrValue, 
     override fun negate() = Gt(target, left, right).also { it.copyLabel(this) }
 }
 
-class Gt(override val target: Identifier, override val left: IdentifierOrValue, override val right: IdentifierOrValue) :
+class Gt(override val target: Identifier, override var left: IdentifierOrValue, override var right: IdentifierOrValue) :
     Instruction("GT"),
     BinaryInstruction {
     override fun canNegate(): Boolean = true
@@ -134,7 +134,7 @@ class Gt(override val target: Identifier, override val left: IdentifierOrValue, 
     override fun negate() = Le(target, left, right).also { it.copyLabel(this) }
 }
 
-class Ge(override val target: Identifier, override val left: IdentifierOrValue, override val right: IdentifierOrValue) :
+class Ge(override val target: Identifier, override var left: IdentifierOrValue, override var right: IdentifierOrValue) :
     Instruction("GE"),
     BinaryInstruction {
     override fun canNegate(): Boolean = true
@@ -153,6 +153,6 @@ class CondJump(var condition: Identifier, targetIndex: Int = -1) : JumpInstructi
 class FunctionCall(val target: Identifier, val functionName: Identifier, val args: List<Identifier>) :
     Instruction("CALL")
 
-class Ret(val value: IdentifierOrValue?) : Instruction("RET")
+class Ret(var value: IdentifierOrValue?) : Instruction("RET")
 
 class Noop : Instruction("NOP")

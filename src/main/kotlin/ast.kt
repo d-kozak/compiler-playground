@@ -11,7 +11,9 @@ data class Identifier(val name: String) : IdentifierOrValue {
     override fun toString(): String = name
 }
 
-data class IntConstant(val value: Int) : IdentifierOrValue
+data class IntConstant(val value: Int) : IdentifierOrValue {
+    override fun toString(): String = value.toString()
+}
 
 
 sealed class TopLevelDeclaration
