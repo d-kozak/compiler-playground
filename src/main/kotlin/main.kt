@@ -1,5 +1,7 @@
 import passes.OptimizationPass
+import passes.RemoveNoopPass
 import passes.SimplifyJumpConditions
+import passes.setInstructionIndexes
 import java.io.File
 import java.io.FileWriter
 import kotlin.io.path.Path
@@ -12,13 +14,14 @@ inline fun dumpTo(fileName: String, block: FileWriter.() -> Unit) {
     FileWriter(dumpDir.toFile()).use(block)
 }
 
-val passes = listOf<OptimizationPass>(SimplifyJumpConditions())
+val passes = listOf<OptimizationPass>(SimplifyJumpConditions(), RemoveNoopPass())
 fun main(args: Array<String>) {
     val fileName = if (args.size == 1) args[0] else "programs/source/fib.prog"
     val root = parseFile(fileName)
     val irFunctions = mutableListOf<IrFunction>()
     for (decl in root.declarations) {
         val ir = compile(decl as FunctionDeclarationNode)
+        setInstructionIndexes(ir)
         var str = dumpInstructions(ir)
         println(str)
         dumpTo("${decl.name}.ir") { write(str) }
@@ -26,6 +29,7 @@ fun main(args: Array<String>) {
 
         for (pass in passes) {
             pass.apply(ir)
+            dumpTo("${decl.name}.ir_after_${pass.javaClass.name}") { write(dumpInstructions(ir)) }
         }
 
         println("After opts")

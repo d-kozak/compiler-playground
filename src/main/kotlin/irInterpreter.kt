@@ -17,7 +17,7 @@ class Scope(var parent: Scope? = null) {
             if (res != null) return res
             curr = curr.parent
         }
-        semanticError("Trying to lookup undeclared variable ${id.name}")
+        semanticError("Trying to lookup undeclared variable '${id.name}'")
     }
 
     fun insert(id: Identifier, value: Int) {
@@ -75,14 +75,14 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
                 }
 
                 is DirectJump -> {
-                    i = inst.targetIndex
+                    i = inst.target.index
                     continue
                 }
 
                 is CondJump -> {
                     val cond = currentScope.lookup(inst.condition)
                     if (asBoolean(cond)) {
-                        i = inst.targetIndex
+                        i = inst.target.index
                         continue
                     }
                 }
@@ -147,10 +147,14 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
 
 
     private inline fun executeBinary(inst: BinaryInstruction, op: (Int, Int) -> Int) {
-        val left = currentScope.lookup(inst.left)
-        val right = currentScope.lookup(inst.right)
-        val res = op(left, right)
-        currentScope.insert(inst.target, res)
+        try {
+            val left = currentScope.lookup(inst.left)
+            val right = currentScope.lookup(inst.right)
+            val res = op(left, right)
+            currentScope.insert(inst.target, res)
+        } catch (err: SemanticError) {
+            semanticError("When executing $inst: ${err.message}")
+        }
     }
 
     private fun pushScope() {

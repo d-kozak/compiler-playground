@@ -1,4 +1,4 @@
-data class IrFunction(val name: Identifier, val params: List<Identifier>, val instructions: Array<Instruction>)
+data class IrFunction(val name: Identifier, val params: List<Identifier>, var instructions: Array<Instruction>)
 
 sealed class Instruction(var name: String) {
     fun copyLabel(source: Instruction) {
@@ -14,6 +14,13 @@ sealed class Instruction(var name: String) {
         }
 
     var label: Identifier? = null
+
+
+    /**
+     * Index into the the instruction array
+     * @see setInstructionIndexes
+     */
+    var index: Int = -1
 }
 
 interface BinaryInstruction {
