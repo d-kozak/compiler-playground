@@ -4,11 +4,14 @@ import java.io.File
 
 data class FileContentNode(val file: File, val declarations: List<TopLevelDeclaration>)
 
-data class Identifier(val name: String) {
+
+sealed interface IdentifierOrValue
+
+data class Identifier(val name: String) : IdentifierOrValue {
     override fun toString(): String = name
 }
 
-data class IntConstant(val value: Int)
+data class IntConstant(val value: Int) : IdentifierOrValue
 
 
 sealed class TopLevelDeclaration

@@ -10,6 +10,13 @@ class Scope(var parent: Scope? = null) {
 
     private val elems = mutableMapOf<Identifier, Int>()
 
+
+    fun lookup(id: IdentifierOrValue): Int = when (id) {
+        is Identifier -> lookup(id)
+        is IntConstant -> id.value
+    }
+
+
     fun lookup(id: Identifier): Int {
         var curr = this as Scope?
         while (curr != null) {
