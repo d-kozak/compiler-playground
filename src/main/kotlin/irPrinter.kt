@@ -32,7 +32,6 @@ private class PrintingScope {
                 is Noop -> appendNoop(inst)
 
                 is Move -> appendMove(inst)
-                is MoveConst -> appendMoveConst(inst)
 
                 is FunctionCall -> appendFunctionCall(inst)
 
@@ -82,10 +81,6 @@ private class PrintingScope {
         buffer.appendLine(')')
     }
 
-    private fun appendMoveConst(inst: MoveConst) {
-        appendTarget(inst.target)
-            .appendLine(inst.constant.value.toString())
-    }
 
     private fun appendMove(inst: Move) {
         appendTarget(inst.target)
@@ -142,5 +137,3 @@ private class PrintingScope {
     }
 
 }
-
-private fun IntConstant.asId(): Identifier = Identifier(value.toString())

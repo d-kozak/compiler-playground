@@ -71,7 +71,6 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
                 is Ge -> executeBinary(inst) { a, b -> asInt(a >= b) }
 
                 is Move -> executeMove(inst)
-                is MoveConst -> executeMoveConst(inst)
 
                 is Noop -> noop()
                 is Not -> executeNot(inst)
@@ -140,9 +139,6 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
         currentScope.insert(inst.target, source)
     }
 
-    private fun executeMoveConst(inst: MoveConst) {
-        currentScope.insert(inst.target, inst.constant.value)
-    }
 
     private fun asInt(b: Boolean): Int {
         return if (b) 1 else 0

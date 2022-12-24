@@ -103,7 +103,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
 
     private fun compileIntLiteral(target: Identifier, expression: IntLiteralNode) {
         instructions.add(
-            MoveConst(
+            Move(
                 target,
                 IntConstant(expression.value)
             )

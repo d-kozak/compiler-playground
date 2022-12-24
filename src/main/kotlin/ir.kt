@@ -33,8 +33,6 @@ interface BinaryInstruction {
 
     fun negate(): Instruction
 }
-
-class MoveConst(val target: Identifier, val constant: IntConstant) : Instruction("MOVC")
 class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")
 class Add(

@@ -5,7 +5,6 @@ import BinaryInstruction
 import Identifier
 import IdentifierOrValue
 import Move
-import MoveConst
 import Ret
 
 class DirectConstantPropagationPass : BasicBlockPass {
@@ -13,9 +12,6 @@ class DirectConstantPropagationPass : BasicBlockPass {
         val values = mutableMapOf<Identifier, IdentifierOrValue>()
         for (instruction in block.instructions) {
             when {
-                instruction is MoveConst -> {
-                    values[instruction.target] = instruction.constant
-                }
 
                 instruction is Move -> {
                     val nSource = values[instruction.source]
