@@ -29,7 +29,7 @@ enum class BinaryOperation(val symbol: String) {
     MULTIPLICATION("*"),
     DIVISION("/"),
     EQUALS("=="),
-    NOT_EQUALS(" !="),
+    NOT_EQUALS("!="),
     LESS_THAN("<"),
     LESS_OR_EQUAL("<="),
     GREATER_THAN(">"),

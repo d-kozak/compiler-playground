@@ -35,6 +35,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Graph visualizations for the CFG
 - [x] Introduce optimization passes.
 - [x] Constant propagation inside basic blocks
+- [ ] Data-flow analysis
+- [ ] SSA form
 - [ ] Figure out how to output and debug optimization passes so that the output does not get out of hands.
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
