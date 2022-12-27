@@ -19,7 +19,7 @@ def exec_cmd(cmd):
 
 
 def build_project():
-    exec_cmd("./gradlew build")
+    exec_cmd(f"{PROJ_DIR}/gradlew build")
     exec_cmd(f"unzip -u {ZIP_FILE}")
 
 
