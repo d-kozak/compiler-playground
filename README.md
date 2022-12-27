@@ -47,7 +47,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Basic arrays algorithms
   - [x] Find min
   - [x] Selection sort
-  - [x] Quicksort
+  - [ ] Quicksort
 ## Other Ideas and Side Tasks
 
 - [x] Support for constants directly in the IR. The extra variables like $i = 1 just for $j = $k + $i are not necessary
