@@ -1,4 +1,4 @@
-fun interpretIr(functions: List<IrFunction>) {
+fun interpret(functions: List<IrFunction>) {
     // todo check for name collisions
     val lookup = functions.associateBy { it.name }
     val main = lookup[Identifier("main")] ?: semanticError("No main method found")

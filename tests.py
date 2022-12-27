@@ -2,6 +2,7 @@
 
 import glob
 import subprocess
+import sys
 
 test_dir = "./programs/source"
 
@@ -13,7 +14,7 @@ launcher = "./compiler-playground-1.0-SNAPSHOT/bin/compiler-playground"
 
 
 def exec_cmd(cmd):
-    return subprocess.call(cmd, shell=True, universal_newlines=True)
+    return subprocess.run(cmd, shell=True, universal_newlines=True)
 
 
 def build_project():
@@ -23,14 +24,24 @@ def build_project():
 
 def run_test(source_file):
     print(f"Running {source_file}")
-    exec_cmd(f"{launcher} {source_file}")
+    proc = exec_cmd(f"{launcher} {source_file}")
+    return proc.returncode == 0
 
 
 def main():
     build_project()
     source_files = glob.glob(f"{test_dir}/*.prog")
+    failed = []
     for file in source_files:
-        run_test(file)
+        if not run_test(file):
+            failed.append(file)
+    if failed:
+        print("Failed tests:", file=sys.stderr)
+        for test in failed:
+            print(test, file=sys.stderr)
+
+    else:
+        print("All tests passed :)")
 
 
 if __name__ == "__main__":

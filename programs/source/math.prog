@@ -18,3 +18,7 @@ fun f4(a,b,c,d){
 fun f5(a,b,c){
     return a+b*c
 }
+
+fun main(){
+    f2()
+}
