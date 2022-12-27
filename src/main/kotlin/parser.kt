@@ -97,8 +97,10 @@ class Parser(val lexer: Lexer, val file: File) {
                 val expression = parseExpression()
                 lexer.consume(TokenType.PAREN_RIGHT)
                 val thenStatement = parseBlock()
-                // todo if-else
-                return IfNode(expression, thenStatement)
+                return if (lexer.matchAndEat(TokenType.KEYWORD_ELSE)) {
+                    val elseStatement = parseBlock()
+                    IfNode(expression, thenStatement, elseStatement)
+                } else IfNode(expression, thenStatement)
             }
 
 

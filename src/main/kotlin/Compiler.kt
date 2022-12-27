@@ -15,7 +15,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/is_even.prog"
+        val fileName = config.inputFile ?: "programs/source/if_else.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
@@ -61,6 +61,8 @@ class Compiler(
                 }
                 debugDump.dump(cfg, pass)
             }
+
+            debugDump.dumpFinalCfg(cfg)
         }
     }
 }

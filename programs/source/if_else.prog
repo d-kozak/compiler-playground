@@ -1,0 +1,30 @@
+fun tst(a){
+    if(a < 10){
+        assert(a<10)
+        if(a < 5){
+            assert(a < 5)
+            assert(a < 10)
+        } else {
+            assert(a >= 5)
+            assert(a < 10)
+        }
+    } else {
+        assert(a >=10)
+        if(a > 20){
+            assert(a >= 10)
+            assert(a > 20)
+        } else {
+            assert(a >= 10)
+            assert(a <= 20)
+        }
+    }
+}
+
+fun main(){
+    i = 0
+    l = 21
+    while(i < l) {
+        tst(i)
+        i = i+1
+    }
+}

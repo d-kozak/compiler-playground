@@ -1,11 +1,15 @@
 import BinaryOperation.*
 
-class NameGen(val prefix: String = "\$") {
+class NameGen(var prefix: String = "\$") {
     val sink = Identifier("${prefix}SINK")
 
     var curr = 'a'
 
     fun next(): Identifier {
+        if (curr == 'z') {
+            prefix += 'z'
+            curr = 'a'
+        }
         return Identifier("$prefix${curr++}")
     }
 
@@ -70,9 +74,23 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
 
         compileStatements(statement.thenStatement)
 
-        if (instructions.last() !is Ret)
-            instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of basic block
-        condition.targetIndex = instructions.size
+
+        val elseStatement = statement.elseStatement
+        if (elseStatement == null) {
+            if (instructions.last() !is Ret)
+                instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of basic block
+            condition.targetIndex = instructions.size
+        } else {
+            val fromThenToEndJump = DirectJump()
+            instructions.add(fromThenToEndJump)
+            condition.targetIndex = instructions.size
+
+            compileStatements(elseStatement)
+
+            if (instructions.last() !is Ret)
+                instructions.add(DirectJump(instructions.size + 1)) // add an explicit jump at the end of th basic block
+            fromThenToEndJump.targetIndex = instructions.size
+        }
 
     }
 

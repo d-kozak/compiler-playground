@@ -41,8 +41,12 @@ sealed class StatementNode
 data class AssignmentNode(val variable: Identifier, val expression: ExpressionNode) : StatementNode()
 data class ReturnNode(val expression: ExpressionNode?) : StatementNode()
 
-// todo if else
-data class IfNode(val condition: ExpressionNode, val thenStatement: List<StatementNode>) : StatementNode()
+data class IfNode(
+    val condition: ExpressionNode,
+    val thenStatement: List<StatementNode>,
+    val elseStatement: List<StatementNode>? = null
+) : StatementNode()
+
 data class WhileNode(val condition: ExpressionNode, val body: List<StatementNode>) : StatementNode()
 
 sealed class ExpressionNode : StatementNode()

@@ -2,12 +2,14 @@
 
 fun main(){
     i = 0
-    while(i < 200){
+    while(i <= 200){
+        print(i)
         if(i % 2 == 0){
-            print(i)
             print(1)
-            print()
+        } else {
+            print(0)
         }
+        print()
         i = i + 1
     }
 }

@@ -46,4 +46,9 @@ class DebugDump(val config: CompilerConfig) {
             FileWriter(targetFile.toFile()).use { it.write(value.toString()) }
         }
     }
+
+    fun dumpFinalCfg(cfg: ControlFlowGraph) {
+        val targetFile = DEFAULT_DUMP_DIR.resolve("${cfg.function.name}.dot")
+        FileWriter(targetFile.toFile()).use { it.write(dumpCfg(cfg)) }
+    }
 }

@@ -2,6 +2,7 @@ enum class TokenType {
     KEYWORD_FUN,
     KEYWORD_RETURN,
     KEYWORD_IF,
+    KEYWORD_ELSE,
     KEYWORD_WHILE,
     PAREN_LEFT,
     PAREN_RIGHT,

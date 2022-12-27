@@ -4,6 +4,7 @@ private val keywords = mapOf(
     "fun" to TokenType.KEYWORD_FUN,
     "return" to TokenType.KEYWORD_RETURN,
     "if" to TokenType.KEYWORD_IF,
+    "else" to TokenType.KEYWORD_ELSE,
     "while" to TokenType.KEYWORD_WHILE,
 )
 
