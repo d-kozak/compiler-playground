@@ -37,7 +37,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Constant propagation inside basic blocks
 - [ ] Data-flow analysis
 - [ ] SSA form
-- [ ] Figure out how to output and debug optimization passes so that the output does not get out of hands.
+- [x] Figure out how to output and debug optimization passes so that the output does not get out of hands.
 - [ ] Bytecode interpreter - Once there is a low level IR which is executable, the next logical step seems to be a
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
@@ -48,8 +48,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Support for constants directly in the IR. The extra variables like $i = 1 just for $j = $k + $i are not necessary
   make the code longer
 - [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
-- [ ] Restructure main and provide proper option handling for various modes of the compiler.
-- [ ] Command line build command and launcher.
+- [x] Restructure main and provide proper option handling for various modes of the compiler.
+- [x] Command line build command and launcher.
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,
   because anything from internal representation all the way to the syntax can change.

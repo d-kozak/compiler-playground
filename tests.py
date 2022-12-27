@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 
 import glob
+import os
 import subprocess
 import sys
 
-test_dir = "./programs/source"
-
-gradle_output = "./build/distributions"
-
-zip_file_name = "compiler-playground-1.0-SNAPSHOT.zip"
-
-launcher = "./compiler-playground-1.0-SNAPSHOT/bin/compiler-playground"
+PROJ_DIR = os.path.dirname(os.path.realpath(__file__))
+TESTS_DIR = os.path.join(PROJ_DIR, "programs/source")
+GRADLE_OUTPUT_DIR = os.path.join(PROJ_DIR, "build/distributions")
+VERSION_NAME = "compiler-playground-1.0-SNAPSHOT"
+ZIP_FILE_NAME = f"{VERSION_NAME}.zip"
+ZIP_FILE = os.path.join(GRADLE_OUTPUT_DIR, ZIP_FILE_NAME)
+LAUNCHER = os.path.join(PROJ_DIR, f"{VERSION_NAME}/bin/compiler-playground")
 
 
 def exec_cmd(cmd):
@@ -18,19 +19,19 @@ def exec_cmd(cmd):
 
 
 def build_project():
-    exec_cmd("gradle build")
-    exec_cmd(f"unzip -u {gradle_output}/{zip_file_name}")
+    exec_cmd("./gradlew build")
+    exec_cmd(f"unzip -u {ZIP_FILE}")
 
 
 def run_test(source_file):
     print(f"Running {source_file}")
-    proc = exec_cmd(f"{launcher} {source_file}")
+    proc = exec_cmd(f"{LAUNCHER} {source_file}")
     return proc.returncode == 0
 
 
 def main():
     build_project()
-    source_files = glob.glob(f"{test_dir}/*.prog")
+    source_files = glob.glob(f"{TESTS_DIR}/*.prog")
     failed = []
     for file in source_files:
         if not run_test(file):
