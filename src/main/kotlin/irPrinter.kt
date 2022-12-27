@@ -33,6 +33,8 @@ private class PrintingScope {
 
                 is Move -> appendMove(inst)
 
+                is ArrayRead -> appendArrayRead(inst)
+
                 is FunctionCall -> appendFunctionCall(inst)
 
                 is Ret -> appendRet(inst)
@@ -81,10 +83,18 @@ private class PrintingScope {
         buffer.appendLine(')')
     }
 
-
     private fun appendMove(inst: Move) {
         appendTarget(inst.target)
             .appendLine(inst.source.toString())
+    }
+
+
+    private fun appendArrayRead(inst: ArrayRead) {
+        appendTarget(inst.target)
+            .append(inst.arrayBase)
+            .append('[')
+            .append(inst.arrIndex)
+            .appendLine(']')
     }
 
 

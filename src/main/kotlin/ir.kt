@@ -36,6 +36,8 @@ interface BinaryInstruction {
     fun negate(): Instruction
 }
 
+data class ArrayRead(val target: Identifier, val arrayBase: Identifier, val arrIndex: Identifier) : Instruction("AREAD")
+
 class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")
 class Add(

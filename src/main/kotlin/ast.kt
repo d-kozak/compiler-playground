@@ -11,8 +11,22 @@ data class Identifier(val name: String) : IdentifierOrValue {
     override fun toString(): String = name
 }
 
-data class IntConstant(val value: Int) : IdentifierOrValue {
+data class IntConstant(val value: Int) : IdentifierOrValue, Value {
     override fun toString(): String = value.toString()
+
+    override fun plus(other: Value): Value = IntConstant(value + unwrap(other))
+
+    override fun minus(other: Value): Value = IntConstant(value - unwrap(other))
+
+    override fun times(other: Value): Value = IntConstant(value * unwrap(other))
+
+    override fun div(other: Value): Value = IntConstant(value / unwrap(other))
+
+    override fun rem(other: Value): Value = IntConstant(value % unwrap(other))
+
+    override fun compareTo(other: Value): Int = value.compareTo(unwrap(other))
+
+    private fun unwrap(other: Value) = (other as IntConstant).value
 }
 
 
@@ -65,3 +79,8 @@ data class BinaryOpNode(val left: ExpressionNode, val operation: BinaryOperation
 data class FunctionCallNode(val name: Identifier, val args: List<ExpressionNode>) : ExpressionNode()
 data class IntLiteralNode(val value: Int) : ExpressionNode()
 data class VariableReadNode(val identifier: Identifier) : ExpressionNode()
+
+data class ArrayReadNode(
+    val arrayExpr: ExpressionNode,
+    val indexExpr: ExpressionNode
+) : ExpressionNode()

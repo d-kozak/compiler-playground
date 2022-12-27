@@ -52,6 +52,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
 - [x] Restructure main and provide proper option handling for various modes of the compiler.
 - [x] Command line build command and launcher.
+- [ ] Clear and formalize the representation for values for interpreters
 - [ ] Nicer error reporting, ideally showing the code the threw failed.
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,

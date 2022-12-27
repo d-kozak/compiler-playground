@@ -256,11 +256,18 @@ class Parser(val lexer: Lexer, val file: File) {
         when (left.type) {
             TokenType.INT_LITERAL -> return IntLiteralNode(left.value.toInt())
             TokenType.IDENTIFIER -> {
+                var node = VariableReadNode(Identifier(left.value)) as ExpressionNode
                 if (lexer.match(TokenType.PAREN_LEFT)) {
                     lexer.consume(TokenType.PAREN_LEFT)
-                    return finishFuctionCall(left)
+                    node = finishFuctionCall(left)
                 }
-                return VariableReadNode(Identifier(left.value))
+                var indexExpr = null as ExpressionNode?
+                if (lexer.matchAndEat(TokenType.SQUARE_BRACKET_LEFT)) {
+                    indexExpr = parseExpression()
+                    lexer.matchAndEat(TokenType.SQUARE_BRACKET_RIGHT)
+                }
+
+                return if (indexExpr != null) ArrayReadNode(node, indexExpr) else node
             }
 
             else -> lexer.syntaxError("Expected variable access or literal value, got $left", left)

@@ -66,6 +66,8 @@ class Lexer(val input: String) {
                 ')' -> return produceToken(TokenType.PAREN_RIGHT)
                 '{' -> return produceToken(TokenType.BRACKET_LEFT)
                 '}' -> return produceToken(TokenType.BRACKET_RIGHT)
+                '[' -> return produceToken(TokenType.SQUARE_BRACKET_LEFT)
+                ']' -> return produceToken(TokenType.SQUARE_BRACKET_RIGHT)
                 '+' -> return produceToken(TokenType.PLUS)
                 '-' -> return produceToken(TokenType.MINUS)
                 '*' -> return produceToken(TokenType.MULT)
