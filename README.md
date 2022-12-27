@@ -36,7 +36,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Introduce optimization passes.
 - [x] Constant propagation inside basic blocks
 - [x] Assert statement/call. Mainly to verify test programs without having to diff their stdout.
-- [ ] More test programs to verify the current infrastructure (and extend/fix if necessary).
+- [x] More test programs to verify the current infrastructure (and extend/fix if necessary).
 - [ ] Data-flow analysis
 - [ ] SSA form
 - [x] Figure out how to output and debug optimization passes so that the output does not get out of hands.
@@ -44,7 +44,10 @@ transform it to lower level IR and interpret it. Now I am considering what to do
   bytecode interpreter.
   I'm interested in the performance differences compared to the IR interpreter.
 - [ ] Semantic analysis - At least differentiate void and int functions.
-
+- [x] Basic arrays algorithms
+  - [x] Find min
+  - [x] Selection sort
+  - [x] Quicksort
 ## Other Ideas and Side Tasks
 
 - [x] Support for constants directly in the IR. The extra variables like $i = 1 just for $j = $k + $i are not necessary
@@ -52,12 +55,13 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
 - [x] Restructure main and provide proper option handling for various modes of the compiler.
 - [x] Command line build command and launcher.
+- [ ] Support for measuring performance.
 - [ ] Clear and formalize the representation for values for interpreters
 - [ ] Nicer error reporting, ideally showing the code the threw failed.
-- [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
+- [x] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,
   because anything from internal representation all the way to the syntax can change.
-- [ ] Support for arrays. Once arrays are in place, basic algorithms can be written as test programs :)
+- [x] Support for arrays. Once arrays are in place, basic algorithms can be written as test programs :)
 - [ ] AST interpreter - I've already implemented some, so it is not a priority at the moment. I'd rather focused on
   later
   stages of compilation.

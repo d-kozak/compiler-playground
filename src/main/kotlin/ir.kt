@@ -37,6 +37,7 @@ interface BinaryInstruction {
 }
 
 data class ArrayRead(val target: Identifier, val arrayBase: Identifier, val arrIndex: Identifier) : Instruction("AREAD")
+data class ArrayWrite(val arr: Identifier, val arrIndex: Identifier, val value: Identifier) : Instruction("AWRITE")
 
 class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")

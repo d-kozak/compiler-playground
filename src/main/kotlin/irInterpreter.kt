@@ -67,6 +67,10 @@ data class ArrayValue(var arr: IntArray) : Value {
     private fun cannotPerform(): Nothing {
         semanticError("Cannot perform arithmetic on arrays")
     }
+
+    operator fun set(index: IntConstant, value: IntConstant) {
+        arr[index.value] = value.value
+    }
 }
 
 class Scope(var parent: Scope? = null) {
@@ -137,6 +141,7 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
                 is Move -> executeMove(inst)
 
                 is ArrayRead -> executeArrayRead(inst)
+                is ArrayWrite -> executeArrayWrite(inst)
 
                 is Noop -> noop()
                 is Not -> executeNot(inst)
@@ -172,6 +177,13 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
         val index = currentScope.lookup(inst.arrIndex) as IntConstant
         val unwraped = base.arr[index.value]
         currentScope.insert(inst.target, IntConstant(unwraped))
+    }
+
+    private fun executeArrayWrite(inst: ArrayWrite) {
+        val arr = currentScope.lookup(inst.arr) as ArrayValue
+        val index = currentScope.lookup(inst.arrIndex) as IntConstant
+        val value = currentScope.lookup(inst.value) as IntConstant
+        arr[index] = value
     }
 
     private fun executeCall(call: FunctionCall) {

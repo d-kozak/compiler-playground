@@ -15,7 +15,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/find_min.prog"
+        val fileName = config.inputFile ?: "programs/source/selection_sort.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)

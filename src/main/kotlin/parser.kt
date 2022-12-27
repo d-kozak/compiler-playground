@@ -61,6 +61,14 @@ class Parser(val lexer: Lexer, val file: File) {
                 val identifier = start
                 val next = lexer.next()
                 when (next.type) {
+                    TokenType.SQUARE_BRACKET_LEFT -> {
+                        val indexExpr = parseExpression()
+                        lexer.consume(TokenType.SQUARE_BRACKET_RIGHT)
+                        lexer.consume(TokenType.EQ)
+                        val expr = parseExpression()
+                        return ArrayWriteNode(VariableReadNode(Identifier(identifier.value)), indexExpr, expr)
+                    }
+
                     TokenType.EQ -> {
                         val expression = parseExpression()
                         return AssignmentNode(Identifier(identifier.value), expression)

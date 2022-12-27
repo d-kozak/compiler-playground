@@ -84,3 +84,9 @@ data class ArrayReadNode(
     val arrayExpr: ExpressionNode,
     val indexExpr: ExpressionNode
 ) : ExpressionNode()
+
+data class ArrayWriteNode(
+    val arrayExpr: ExpressionNode,
+    val indexExpr: ExpressionNode,
+    val value: ExpressionNode
+) : StatementNode()

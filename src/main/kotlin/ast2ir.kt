@@ -47,6 +47,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
             is IntLiteralNode -> compileIntLiteral(nameGen.sink, statement)
             is VariableReadNode -> compileVariableRead(nameGen.sink, statement)
             is ArrayReadNode -> compileArrayRead(nameGen.sink, statement)
+            is ArrayWriteNode -> compileArrayWrite(statement)
             is ReturnNode -> compileReturn(statement)
             is IfNode -> compileIf(statement)
             is WhileNode -> compileWhile(statement)
@@ -149,6 +150,13 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
         val arrayBase = compileExpression(statement.arrayExpr)
         val index = compileExpression(statement.indexExpr)
         instructions.add(ArrayRead(target, arrayBase, index))
+    }
+
+    private fun compileArrayWrite(node: ArrayWriteNode) {
+        val arr = compileExpression(node.arrayExpr)
+        val index = compileExpression(node.indexExpr)
+        val value = compileExpression(node.value)
+        instructions.add(ArrayWrite(arr, index, value))
     }
 
     private fun compileIntLiteral(target: Identifier, expression: IntLiteralNode) {

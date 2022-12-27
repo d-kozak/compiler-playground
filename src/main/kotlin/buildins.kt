@@ -51,6 +51,6 @@ object ArrayConstructor : BuildInt {
         val size = args[0]
         semanticCheck(size is IntConstant) { "Array size should be an integer" }
         val sizeAsInt = (size as IntConstant).value
-        return ArrayValue(IntArray(sizeAsInt) { rnd.nextInt(0, 100) })
+        return ArrayValue(IntArray(sizeAsInt) { rnd.nextInt(0, size.value) })
     }
 }

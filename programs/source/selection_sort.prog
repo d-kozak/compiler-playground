@@ -1,0 +1,48 @@
+
+fun swap(arr,i,j) {
+    tmp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = tmp
+}
+
+fun find_min(arr,i,len) {
+    assert(i < len)
+    min_i = i
+    for(j = i + 1 ; j < len ; j = j + 1){
+        if(arr[j] < arr[min_i]) {
+            min_i = j
+        }
+    }
+    return min_i
+}
+
+fun selection_sort(arr,len) {
+    for(i = 0 ; i < len ; i = i + 1){
+        min_i = find_min(arr,i,len)
+        swap(arr,i,min_i)
+    }
+}
+
+fun assert_sorted(arr,len){
+    for(i = 0 ; i < len-1 ; i = i+1){
+        assert(arr[i] <= arr[i+1])
+    }
+}
+
+fun run_sort(len){
+    print(len)
+    arr = IntArray(len)
+    print(arr)
+    selection_sort(arr,len)
+    print(arr)
+    assert_sorted(arr,len)
+    print()
+}
+
+
+
+fun main() {
+    for(len = 1 ; len <= 100 ; len = len + 1){
+        run_sort(len)
+    }
+ }
