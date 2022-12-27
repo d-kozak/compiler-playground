@@ -49,10 +49,12 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
             is ReturnNode -> compileReturn(statement)
             is IfNode -> compileIf(statement)
             is WhileNode -> compileWhile(statement)
+            is ForNode -> compileFor(statement)
         }
     }
 
     private fun compileWhile(statement: WhileNode) {
+        // todo remove redundancies between while, for and if
         val condStartIndex = instructions.size
         val cond = compileExpression(statement.condition)
         val negCont = nameGen.next()
@@ -61,6 +63,28 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
         instructions.add(condition)
 
         compileStatements(statement.body)
+        instructions.add(DirectJump(condStartIndex))
+        condition.targetIndex = instructions.size
+    }
+
+    private fun compileFor(statement: ForNode) {
+        val initExpr = statement.initExpr
+        if (initExpr != null) {
+            compileAssignment(initExpr)
+        }
+        val condStartIndex = instructions.size
+        val cond = compileExpression(statement.condition)
+        val negCont = nameGen.next()
+        instructions.add(Not(negCont, cond))
+        val condition = CondJump(negCont)
+        instructions.add(condition)
+
+        compileStatements(statement.body)
+
+        val increment = statement.increment
+        if (increment != null)
+            compileAssignment(increment)
+
         instructions.add(DirectJump(condStartIndex))
         condition.targetIndex = instructions.size
     }

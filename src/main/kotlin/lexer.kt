@@ -6,6 +6,7 @@ private val keywords = mapOf(
     "if" to TokenType.KEYWORD_IF,
     "else" to TokenType.KEYWORD_ELSE,
     "while" to TokenType.KEYWORD_WHILE,
+    "for" to TokenType.KEYWORD_FOR
 )
 
 class Lexer(val input: String) {
@@ -78,6 +79,7 @@ class Lexer(val input: String) {
                 }
 
                 ',' -> return produceToken(TokenType.COMMA)
+                ';' -> return produceToken(TokenType.SEMICOLON)
                 '!' -> {
                     if (pos + 1 < n && input[pos + 1] == '=')
                         return produceToken(TokenType.NEQ, nextPos = pos + 2)

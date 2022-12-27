@@ -4,6 +4,7 @@ enum class TokenType {
     KEYWORD_IF,
     KEYWORD_ELSE,
     KEYWORD_WHILE,
+    KEYWORD_FOR,
     PAREN_LEFT,
     PAREN_RIGHT,
     BRACKET_LEFT,
@@ -22,7 +23,8 @@ enum class TokenType {
     EQ,
     EQ_EQ,
     NEQ,
-    COMMA
+    COMMA,
+    SEMICOLON
 }
 
 data class SourceLocation(val line: Int, val column: IntRange) {

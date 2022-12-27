@@ -112,11 +112,39 @@ class Parser(val lexer: Lexer, val file: File) {
                 return WhileNode(expression, block)
             }
 
+            TokenType.KEYWORD_FOR -> {
+                lexer.consume(TokenType.PAREN_LEFT)
+                var initExpr = null as AssignmentNode?
+                var condition = IntLiteralNode(1) as ExpressionNode
+                var increment = null as AssignmentNode?
+                if (!lexer.matchAndEat(TokenType.SEMICOLON)) {
+                    initExpr = parseAssignment()
+                    lexer.consume(TokenType.SEMICOLON)
+                }
+                if (!lexer.matchAndEat(TokenType.SEMICOLON)) {
+                    condition = parseExpression()
+                    lexer.consume(TokenType.SEMICOLON)
+                }
+                if (!lexer.matchAndEat(TokenType.PAREN_RIGHT)) {
+                    increment = parseAssignment()
+                    lexer.consume(TokenType.PAREN_RIGHT)
+                }
+                val block = parseBlock()
+                return ForNode(initExpr, condition, increment, block)
+            }
+
             else -> lexer.returnToken(start)
             // fallthrough, handle expression below lexer.syntaxError("Unexpected statement type, got $start", start)
         }
         // if nothing specific matched, try to parse it as a simple expression
         return parseExpression()
+    }
+
+    private fun parseAssignment(): AssignmentNode {
+        val id = lexer.consume(TokenType.IDENTIFIER)
+        lexer.consume(TokenType.EQ)
+        val expr = parseExpression()
+        return AssignmentNode(Identifier(id.value), expr)
     }
 
     /**

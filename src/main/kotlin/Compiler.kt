@@ -15,7 +15,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/if_else.prog"
+        val fileName = config.inputFile ?: "programs/source/for_loop.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)

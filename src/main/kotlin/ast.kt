@@ -49,6 +49,15 @@ data class IfNode(
 
 data class WhileNode(val condition: ExpressionNode, val body: List<StatementNode>) : StatementNode()
 
+data class ForNode(
+    // todo forcing init and inc to be assignments is in a way too restrictive
+    val initExpr: AssignmentNode?,
+    val condition: ExpressionNode,
+    val increment: AssignmentNode?,
+    val body: List<StatementNode>
+) :
+    StatementNode()
+
 sealed class ExpressionNode : StatementNode()
 data class BinaryOpNode(val left: ExpressionNode, val operation: BinaryOperation, val right: ExpressionNode) :
     ExpressionNode()

@@ -1,0 +1,15 @@
+fun is_even(i) {
+    return i % 2 == 0
+}
+
+fun main(){
+    for(i = 0 ; i < 100 ; i = i + 1){
+        print(i)
+        if(is_even(i)){
+            print(1)
+        } else {
+            print(0)
+        }
+        print()
+    }
+}
