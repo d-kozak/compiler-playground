@@ -15,12 +15,16 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/asserts.prog"
-        val root = parseFile(fileName)
-        val irFunctions = lowerToIr(root)
-        optimize(irFunctions)
-        debugDump.onCompilationFinished()
-        interpret(irFunctions)
+        val fileName = config.inputFile ?: "programs/source/is_even.prog"
+        try {
+            val root = parseFile(fileName)
+            val irFunctions = lowerToIr(root)
+            optimize(irFunctions)
+
+            interpret(irFunctions)
+        } finally {
+            debugDump.onCompilationFinished()
+        }
     }
 
     private fun lowerToIr(root: FileContentNode): MutableList<IrFunction> {

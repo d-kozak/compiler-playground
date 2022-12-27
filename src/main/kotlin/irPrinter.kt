@@ -105,6 +105,7 @@ private class PrintingScope {
             is Sub -> BinaryOperation.SUBTRACTION
             is Mult -> BinaryOperation.MULTIPLICATION
             is Div -> BinaryOperation.DIVISION
+            is Mod -> BinaryOperation.MODULO
             is Eq -> BinaryOperation.EQUALS
             is Neq -> BinaryOperation.NOT_EQUALS
             is Lt -> BinaryOperation.LESS_THAN

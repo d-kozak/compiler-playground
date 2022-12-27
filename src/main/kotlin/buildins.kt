@@ -21,8 +21,10 @@ object ReadInput : BuildInt {
 
 object Print : BuildInt {
     override fun invoke(vararg args: Int): Int? {
-        semanticCheck(args.size == 1) { "Print should be passed exactly one argument" }
-        println(args[0])
+        semanticCheck(args.size <= 1) { "Print should be passed exactly at most one argument" }
+        if (args.size == 1)
+            println(args[0])
+        else println()
         return null
     }
 }

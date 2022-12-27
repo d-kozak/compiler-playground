@@ -28,6 +28,7 @@ enum class BinaryOperation(val symbol: String) {
     SUBTRACTION("-"),
     MULTIPLICATION("*"),
     DIVISION("/"),
+    MODULO("%"),
     EQUALS("=="),
     NOT_EQUALS("!="),
     LESS_THAN("<"),

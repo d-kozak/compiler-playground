@@ -68,6 +68,7 @@ class Lexer(val input: String) {
                 '-' -> return produceToken(TokenType.MINUS)
                 '*' -> return produceToken(TokenType.MULT)
                 '/' -> return produceToken(TokenType.DIV)
+                '%' -> return produceToken(TokenType.MOD)
                 '=' -> {
                     return if (pos + 1 < n && input[pos + 1] == '=')
                         produceToken(TokenType.EQ_EQ, nextPos = pos + 2)

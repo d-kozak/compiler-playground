@@ -14,13 +14,17 @@ ZIP_FILE = os.path.join(GRADLE_OUTPUT_DIR, ZIP_FILE_NAME)
 LAUNCHER = os.path.join(PROJ_DIR, f"{VERSION_NAME}/bin/compiler-playground")
 
 
-def exec_cmd(cmd):
-    return subprocess.run(cmd, shell=True, universal_newlines=True)
+def exec_cmd(cmd, fail_on_error=False):
+    proc = subprocess.run(cmd, shell=True, universal_newlines=True)
+    if fail_on_error and proc.returncode != 0:
+        print(f"Command {cmd} failed...")
+        sys.exit(1)
+    return proc
 
 
 def build_project():
-    exec_cmd(f"{PROJ_DIR}/gradlew build")
-    exec_cmd(f"unzip -u {ZIP_FILE}")
+    exec_cmd(f"{PROJ_DIR}/gradlew build", fail_on_error=True)
+    exec_cmd(f"unzip -u {ZIP_FILE}", fail_on_error=True)
 
 
 def run_test(source_file):

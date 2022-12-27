@@ -123,6 +123,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
             SUBTRACTION -> Sub(target, left, right)
             MULTIPLICATION -> Mult(target, left, right)
             DIVISION -> Div(target, left, right)
+            MODULO -> Mod(target, left, right)
             EQUALS -> Eq(target, left, right)
             NOT_EQUALS -> Neq(target, left, right)
             LESS_THAN -> Lt(target, left, right)
@@ -142,8 +143,8 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
                 while (instruction.targetIndex >= instructions.size) {
                     instructions.add(Noop())
                 }
+                instructions[instruction.targetIndex].jumpedFrom.add(instruction)
                 instruction.target = instructions[instruction.targetIndex]
-                instructions[instruction.targetIndex].jumpedFrom = instruction
                 if (instruction.target.label == null)
                     instruction.target.label = labelGen.next()
             }

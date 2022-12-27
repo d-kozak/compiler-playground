@@ -4,19 +4,17 @@ data class IrFunction(val name: Identifier, val params: List<Identifier>, var in
 sealed class Instruction(var name: String) {
     fun copyLabel(source: Instruction) {
         this.label = source.label
-        this.jumpedFrom = source.jumpedFrom ?: return
-        this.jumpedFrom!!.target = this
+        this.jumpedFrom = source.jumpedFrom.toMutableSet()
+        for (jumpInstruction in this.jumpedFrom) {
+            jumpInstruction.target = this
+        }
     }
 
     /**
      * @see passes.basicblock.LiveVariableAnalysis
      */
     var isLive: Boolean = false
-    var jumpedFrom: JumpInstruction? = null
-        set(value) {
-            require(this.jumpedFrom == null) { "assuming only a single jump target (for now)" }
-            field = value
-        }
+    var jumpedFrom: MutableSet<JumpInstruction> = mutableSetOf()
 
     var label: Identifier? = null
 
@@ -86,6 +84,16 @@ class Div(
 ) :
     Instruction("DIV"), BinaryInstruction {
 
+    override fun canNegate(): Boolean = false
+
+    override fun negate() = internalError("cannot negate")
+}
+
+class Mod(
+    override val target: Identifier,
+    override var left: IdentifierOrValue,
+    override var right: IdentifierOrValue
+) : Instruction("MOD"), BinaryInstruction {
     override fun canNegate(): Boolean = false
 
     override fun negate() = internalError("cannot negate")

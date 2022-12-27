@@ -2,8 +2,11 @@
 
 fun call(){
     a=1+1
+    assert(a==2)
     b=2+2
+    assert(b == 4)
     c = 3+3
+    assert(c == 6)
 }
 
 fun main(){

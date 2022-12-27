@@ -6,7 +6,7 @@ import Noop
 class RemoveNoopPass : OptimizationPass {
 
     override fun apply(f: IrFunction) {
-        f.instructions = f.instructions.filter { it !is Noop || it.jumpedFrom != null }.toTypedArray()
+        f.instructions = f.instructions.filter { it !is Noop || it.jumpedFrom.isNotEmpty() }.toTypedArray()
         setInstructionIndexes(f)
     }
 }

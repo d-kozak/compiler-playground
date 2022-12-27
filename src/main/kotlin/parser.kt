@@ -198,7 +198,7 @@ class Parser(val lexer: Lexer, val file: File) {
 
     private fun parseMultExpression(): ExpressionNode {
         var res = parseInnerExpression()
-        while (lexer.matchAny(TokenType.MULT, TokenType.DIV)) {
+        while (lexer.matchAny(TokenType.MULT, TokenType.DIV, TokenType.MOD)) {
             when {
                 lexer.matchAndEat(TokenType.MULT) -> {
                     val right = parseInnerExpression()
@@ -208,6 +208,11 @@ class Parser(val lexer: Lexer, val file: File) {
                 lexer.matchAndEat(TokenType.DIV) -> {
                     val right = parseInnerExpression()
                     res = BinaryOpNode(res, BinaryOperation.DIVISION, right)
+                }
+
+                lexer.matchAndEat(TokenType.MOD) -> {
+                    val right = parseInnerExpression()
+                    res = BinaryOpNode(res, BinaryOperation.MODULO, right)
                 }
             }
 

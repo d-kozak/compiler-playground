@@ -21,7 +21,15 @@ fun valueOnNextLineHowToEvaluate(){
     1+1
 }
 
+fun asserts(){
+    assert(add_two(10,20) == 30)
+    assert(add_two(10,200) == 210)
+    assert(add_three(10,20,30) == 60)
+    assert(add_four(2,2,2,2) == 8)
+}
+
 fun main(){
     res = mixed(1,2,3,4)
     print(res)
+    asserts()
 }

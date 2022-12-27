@@ -62,6 +62,7 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
                 is Sub -> executeBinary(inst) { a, b -> a - b }
                 is Mult -> executeBinary(inst) { a, b -> a * b }
                 is Div -> executeBinary(inst) { a, b -> a / b }
+                is Mod -> executeBinary(inst) { a, b -> a % b }
 
                 is Eq -> executeBinary(inst) { a, b -> asInt(a == b) }
                 is Neq -> executeBinary(inst) { a, b -> asInt(a != b) }

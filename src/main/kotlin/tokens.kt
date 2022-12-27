@@ -13,6 +13,7 @@ enum class TokenType {
     MINUS,
     MULT,
     DIV,
+    MOD,
     LT,
     LE,
     GT,
