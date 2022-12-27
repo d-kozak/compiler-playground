@@ -12,7 +12,6 @@ class DirectConstantPropagationPass : BasicBlockPass {
         val values = mutableMapOf<Identifier, IdentifierOrValue>()
         for (instruction in block.instructions) {
             when {
-
                 instruction is Move -> {
                     val nSource = values[instruction.source]
                     if (nSource != null)

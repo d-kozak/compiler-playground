@@ -5,7 +5,7 @@ fun computeCfg(function: IrFunction): ControlFlowGraph {
     return cfg
 }
 
-fun printCfg(cfg: ControlFlowGraph): String = buildString {
+fun dumpCfg(cfg: ControlFlowGraph): String = buildString {
     append("digraph ")
     append(cfg.function.name)
     append(" {")

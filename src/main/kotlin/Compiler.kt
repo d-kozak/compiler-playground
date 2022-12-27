@@ -19,24 +19,8 @@ class Compiler(
         val root = parseFile(fileName)
         val irFunctions = lowerToIr(root)
         optimize(irFunctions)
+        debugDump.onCompilationFinished()
         interpret(irFunctions)
-    }
-
-    private fun optimize(irFunctions: MutableList<IrFunction>) {
-        for (irFunction in irFunctions) {
-            val cfg = computeCfg(irFunction)
-
-            val str = printCfg(cfg)
-            verbose(str)
-            debugDump("${irFunction.name}.cfg") { write(str) }
-
-            for (pass in ALL_BLOCK_LEVEL_PASSES) {
-                for (block in cfg.basicBlocks) {
-                    pass.apply(block)
-                }
-                debugDump("${irFunction.name}.cfg_after_${pass.javaClass.name}") { write(printCfg(cfg)) }
-            }
-        }
     }
 
     private fun lowerToIr(root: FileContentNode): MutableList<IrFunction> {
@@ -44,21 +28,36 @@ class Compiler(
         for (decl in root.declarations) {
             val ir = compile(decl as FunctionDeclarationNode)
             setInstructionIndexes(ir)
-            var str = dumpInstructions(ir)
-            verbose(str)
-            debugDump("${decl.name}.ir") { write(str) }
             irFunctions.add(ir)
-
-            for (pass in ALL_TOP_LEVEL_PASSES) {
-                pass.apply(ir)
-                debugDump("${decl.name}.ir_after_${pass.javaClass.name}") { write(dumpInstructions(ir)) }
-            }
-
-            verbose("After opts")
-            str = dumpInstructions(ir)
+            val str = dumpInstructions(ir)
             verbose(str)
+            debugDump.dump(ir, "After lowering")
         }
         return irFunctions
+    }
+
+    private fun optimize(irFunctions: MutableList<IrFunction>) {
+        for (irFunction in irFunctions) {
+
+            for (pass in ALL_TOP_LEVEL_PASSES) {
+                pass.apply(irFunction)
+                debugDump.dump(irFunction, pass)
+            }
+
+
+            val cfg = computeCfg(irFunction)
+
+            val str = dumpCfg(cfg)
+            verbose(str)
+            debugDump.dump(cfg, "After CFG creation")
+
+            for (pass in ALL_BLOCK_LEVEL_PASSES) {
+                for (block in cfg.basicBlocks) {
+                    pass.apply(block)
+                }
+                debugDump.dump(cfg, pass)
+            }
+        }
     }
 }
 
