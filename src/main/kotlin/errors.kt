@@ -14,3 +14,8 @@ class InternalError(msg: String) : RuntimeException(msg)
 fun runtimeError(msg: String): Nothing = throw RuntimeExecutionError(msg)
 
 class RuntimeExecutionError(msg: String) : RuntimeException(msg)
+
+
+fun failAssert(msg: String): Nothing = throw ProgAssertError(msg)
+
+class ProgAssertError(msg: String) : RuntimeException(msg)

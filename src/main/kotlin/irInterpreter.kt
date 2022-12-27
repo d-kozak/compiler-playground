@@ -140,15 +140,6 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
     }
 
 
-    private fun asInt(b: Boolean): Int {
-        return if (b) 1 else 0
-    }
-
-    private fun asBoolean(x: Int): Boolean {
-        return x != 0
-    }
-
-
     private inline fun executeBinary(inst: BinaryInstruction, op: (Int, Int) -> Int) {
         try {
             val left = currentScope.lookup(inst.left)
@@ -169,3 +160,12 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
     }
 
 }
+
+fun asInt(b: Boolean): Int {
+    return if (b) 1 else 0
+}
+
+fun asBoolean(x: Int): Boolean {
+    return x != 0
+}
+

@@ -15,7 +15,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/fib.prog"
+        val fileName = config.inputFile ?: "programs/source/asserts.prog"
         val root = parseFile(fileName)
         val irFunctions = lowerToIr(root)
         optimize(irFunctions)

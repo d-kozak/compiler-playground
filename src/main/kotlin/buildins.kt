@@ -6,7 +6,8 @@ interface BuildInt {
 
 private val builtIns = mutableMapOf(
     Identifier("input") to ReadInput,
-    Identifier("print") to Print
+    Identifier("print") to Print,
+    Identifier("assert") to Assert
 )
 
 object ReadInput : BuildInt {
@@ -22,6 +23,16 @@ object Print : BuildInt {
     override fun invoke(vararg args: Int): Int? {
         semanticCheck(args.size == 1) { "Print should be passed exactly one argument" }
         println(args[0])
+        return null
+    }
+}
+
+
+object Assert : BuildInt {
+    override fun invoke(vararg args: Int): Int? {
+        semanticCheck(args.size == 1) { "Assert expects one argument - value to check" }
+        if (!asBoolean(args[0]))
+            failAssert("Assertion failed")
         return null
     }
 }

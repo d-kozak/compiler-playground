@@ -35,7 +35,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Graph visualizations for the CFG
 - [x] Introduce optimization passes.
 - [x] Constant propagation inside basic blocks
-- [ ] Assert statement/call. Mainly to verify test programs without having to diff their stdout.
+- [x] Assert statement/call. Mainly to verify test programs without having to diff their stdout.
 - [ ] More test programs to verify the current infrastructure (and extend/fix if necessary).
 - [ ] Data-flow analysis
 - [ ] SSA form
@@ -52,6 +52,7 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
 - [x] Restructure main and provide proper option handling for various modes of the compiler.
 - [x] Command line build command and launcher.
+- [ ] Nicer error reporting, ideally showing the code the threw failed.
 - [ ] Design and implement appropriate testing infrastructure that would help you fix bugs and prevent from regressions.
   But make sure it is as loosely coupled with the actual compiler and language as possible,
   because anything from internal representation all the way to the syntax can change.
