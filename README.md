@@ -35,6 +35,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Graph visualizations for the CFG
 - [x] Introduce optimization passes.
 - [x] Constant propagation inside basic blocks
+- [ ] Assert statement/call. Mainly to verify test programs without having to diff their stdout.
+- [ ] More test programs to verify the current infrastructure (and extend/fix if necessary).
 - [ ] Data-flow analysis
 - [ ] SSA form
 - [x] Figure out how to output and debug optimization passes so that the output does not get out of hands.
