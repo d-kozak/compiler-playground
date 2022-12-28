@@ -77,7 +77,8 @@ class LiveVariableAnalysis : BasicBlockPass {
                 inst is FunctionCall -> {
                     inst.isLive = true
                     for (arg in inst.args) {
-                        liveVariables.add(arg)
+                        if (arg is Identifier)
+                            liveVariables.add(arg)
                     }
                 }
 

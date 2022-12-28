@@ -169,7 +169,7 @@ class CompilationScope(private val file: FunctionDeclarationNode) {
     }
 
     private fun compileFunctionCall(target: Identifier, expression: FunctionCallNode) {
-        val args = expression.args.map { compileExpression(it) }
+        val args: MutableList<IdentifierOrValue> = expression.args.map { compileExpression(it) }.toMutableList()
         instructions.add(FunctionCall(target, expression.name, args))
     }
 

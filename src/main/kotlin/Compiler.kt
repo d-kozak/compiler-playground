@@ -1,14 +1,16 @@
 import asm.Aarch64Assembler
+import passes.RemoveCompletelyUnusedAssignments
 import passes.RemoveNoopPass
 import passes.SimplifyJumpConditions
 import passes.basicblock.DirectConstantPropagationPass
+import passes.cfg.PropagateVariablesWithSingleWrites
 import passes.setInstructionIndexes
 import java.io.File
 
 
-val ALL_TOP_LEVEL_PASSES = listOf(SimplifyJumpConditions(), RemoveNoopPass())
+val ALL_TOP_LEVEL_PASSES = listOf(SimplifyJumpConditions(), RemoveCompletelyUnusedAssignments(), RemoveNoopPass())
 val ALL_BLOCK_LEVEL_PASSES = listOf(DirectConstantPropagationPass())
-
+val ALL_CFG_PASSES = listOf(PropagateVariablesWithSingleWrites())
 
 class Compiler(
     private val config: CompilerConfig,
@@ -16,7 +18,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/print_single.prog"
+        val fileName = config.inputFile ?: "programs/source/selection_sort.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
@@ -24,13 +26,17 @@ class Compiler(
 
             interpret(irFunctions)
 
-            val assembler = Aarch64Assembler(irFunctions, debugDump)
-            assembler.gen()
-            println(assembler.buffer.toString())
-            debugDump.asm(fileName, assembler)
+//            lowerToAsm(irFunctions, fileName)
         } finally {
             debugDump.onCompilationFinished()
         }
+    }
+
+    private fun lowerToAsm(irFunctions: MutableList<IrFunction>, fileName: String) {
+        val assembler = Aarch64Assembler(irFunctions, debugDump)
+        assembler.gen()
+        println(assembler.buffer.toString())
+        debugDump.asm(fileName, assembler)
     }
 
     private fun lowerToIr(root: FileContentNode): MutableList<IrFunction> {
@@ -48,12 +54,8 @@ class Compiler(
 
     private fun optimize(irFunctions: MutableList<IrFunction>) {
         for (irFunction in irFunctions) {
-
-            for (pass in ALL_TOP_LEVEL_PASSES) {
-                pass.apply(irFunction)
-                debugDump.dump(irFunction, pass)
-            }
-
+            // todo create some kind of optimization plan/phase to properly group all the optimizations
+            applyTopLevelPasses(irFunction)
 
             val cfg = computeCfg(irFunction)
 
@@ -61,14 +63,32 @@ class Compiler(
             verbose(str)
             debugDump.dump(cfg, "After CFG creation")
 
-            for (pass in ALL_BLOCK_LEVEL_PASSES) {
-                for (block in cfg.basicBlocks) {
-                    pass.apply(block)
-                }
-                debugDump.dump(cfg, pass)
+            applyBasicBlockPasses(cfg)
+
+            for (cfgPass in ALL_CFG_PASSES) {
+                cfgPass.apply(cfg)
+                debugDump.dump(cfg, cfgPass)
             }
 
+            applyTopLevelPasses(irFunction)
+
             debugDump.dumpFinalCfg(cfg)
+        }
+    }
+
+    private fun applyTopLevelPasses(irFunction: IrFunction) {
+        for (pass in ALL_TOP_LEVEL_PASSES) {
+            pass.apply(irFunction)
+            debugDump.dump(irFunction, pass)
+        }
+    }
+
+    private fun applyBasicBlockPasses(cfg: ControlFlowGraph) {
+        for (pass in ALL_BLOCK_LEVEL_PASSES) {
+            for (block in cfg.basicBlocks) {
+                pass.apply(block)
+            }
+            debugDump.dump(cfg, pass)
         }
     }
 }

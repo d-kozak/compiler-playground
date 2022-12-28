@@ -2,6 +2,7 @@ fun computeCfg(function: IrFunction): ControlFlowGraph {
     val cfg = ControlFlowGraph(function)
     cfg.computeBasicBlocks()
     cfg.findJumpTargets()
+    cfg.computePostOrder()
     return cfg
 }
 
@@ -42,10 +43,25 @@ fun dumpCfg(cfg: ControlFlowGraph): String = buildString {
     appendLine()
 }
 
-// todo id
-data class BasicBlock(
+class BasicBlock(
+    val id: Int,
     val instructions: MutableList<Instruction> = mutableListOf()
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BasicBlock
+
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+}
 
 data class ControlFlowGraph(
     val function: IrFunction,
@@ -53,6 +69,10 @@ data class ControlFlowGraph(
     val instructionToBlock: MutableMap<Instruction, BasicBlock> = mutableMapOf(),
     val successors: MutableMap<BasicBlock, MutableList<BasicBlock>> = mutableMapOf()
 ) {
+
+
+    lateinit var postOrder: MutableList<BasicBlock>
+
     fun computeBasicBlocks() {
         val curr = mutableListOf<Instruction>()
         for (instruction in function.instructions) {
@@ -78,9 +98,12 @@ data class ControlFlowGraph(
         }
     }
 
+
+    private var nextBlockId = 1
+
     private fun newBasicBlock(curr: MutableList<Instruction>) {
         require(curr.isNotEmpty())
-        val block = BasicBlock(curr.toMutableList())
+        val block = BasicBlock(nextBlockId++, curr.toMutableList())
         basicBlocks.add(block)
         for (instruction in curr) {
             instructionToBlock[instruction] = block
@@ -111,5 +134,33 @@ data class ControlFlowGraph(
             }
         }
     }
+
+    fun computePostOrder() {
+        if (basicBlocks.isEmpty()) {
+            this.postOrder = mutableListOf()
+            return
+        }
+        val postOrder = mutableListOf<BasicBlock>()
+        val start = basicBlocks.minBy { it.id }
+
+        val seen = mutableSetOf<BasicBlock>()
+
+        fun dfs(block: BasicBlock) {
+            if (!seen.add(block))
+                return
+            val successors = successors[block]
+            if (successors != null) {
+                for (next in successors)
+                    dfs(next)
+            }
+            postOrder.add(block)
+        }
+
+        dfs(start)
+
+        this.postOrder = postOrder
+    }
+
+    fun reversedPostOrder() = postOrder.asReversed()
 }
 

@@ -1,12 +1,20 @@
 package asm
 
+import Add
+import ArrayRead
+import ArrayWrite
+import CondJump
 import DebugDump
+import DirectJump
 import FunctionCall
+import Ge
 import Identifier
+import IdentifierOrValue
 import Instruction
 import IntConstant
 import IrFunction
 import Move
+import Noop
 import internalError
 
 data class Reg(val name: String) {
@@ -16,8 +24,8 @@ data class Reg(val name: String) {
 }
 
 private class Registers {
-    var free = 9
-    var LIM = 15
+    var free = 19
+    var LIM = 28
 
     val assigned = mutableMapOf<Identifier, Reg>()
     fun registerFor(id: Identifier): Reg {
@@ -25,7 +33,7 @@ private class Registers {
     }
 
     private fun nextRegister(identifier: Identifier): Reg {
-        require(free <= LIM) { "Out of registers" }
+//        require(free <= LIM) { "Out of registers" }
         return Reg("x${free++}")
     }
 }
@@ -45,7 +53,32 @@ class Aarch64Assembler(
         for (f in irFunctions)
             genFunction(f)
 
+        buildIns()
         footer()
+    }
+
+    private fun buildIns() {
+        allocArray()
+    }
+
+    private fun allocArray() {
+        val code = """
+    .globl	_alloc_arr                      ; -- Begin function alloc_arr
+	.p2align	2
+_alloc_arr:                             ; @alloc_arr
+; %bb.0:
+	sub	sp, sp, #32                     ; =32
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16                    ; =16
+
+	lsl	x0, x0, #2
+	bl	_malloc
+
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #32                     ; =32
+	ret
+"""
+        buffer.append(code)
     }
 
     private fun genFunction(f: IrFunction) {
@@ -58,18 +91,74 @@ class Aarch64Assembler(
     }
 
     private fun gen(inst: Instruction) {
+        val label = inst.label
+        if (label != null) genLabel("_${label.name}")
         when (inst) {
+            is Add -> genAdd(inst)
+            is ArrayWrite -> genArrayWrite(inst)
+            is ArrayRead -> genArrayRead(inst)
             is Move -> genMove(inst)
             is FunctionCall -> genCall(inst)
+            is Ge -> genCmp(inst)
+            is CondJump -> genCondJump(inst)
+            is DirectJump -> genDirectJump(inst)
+            is Noop -> genNoop(inst)
             else -> internalError("Unsupported instruction$inst")
         }
     }
 
+    private fun genNoop(inst: Noop) {
+        genInstr("nop")
+    }
+
+    private fun genDirectJump(inst: DirectJump) {
+        genInstr("b _${inst.target.label!!.name}")
+    }
+
+    private fun genArrayRead(inst: ArrayRead) {
+        val arr = regOrValue(inst.arrayBase)
+        val index = regOrValue(inst.arrIndex)
+        val target = registers.registerFor(inst.target)
+        genInstr("ldr $target [$arr, $index, lsl #2]")
+    }
+
+    private fun genArrayWrite(inst: ArrayWrite) {
+        val arr = regOrValue(inst.arr)
+        val index = regOrValue(inst.arrIndex)
+        val value = regOrValue(inst.value)
+        genInstr("str $value [$arr, $index, lsl #2]")
+    }
+
+    private fun genAdd(inst: Add) {
+        genInstr("add ${registers.registerFor(inst.target)}, ${regOrValue(inst.left)}, ${regOrValue(inst.right)}}")
+    }
+
+
+    var prevCmp = null as Instruction?
+    private fun genCondJump(inst: CondJump) {
+        val prev = prevCmp ?: internalError("No test before condjump found")
+        val mnemo = when (prev) {
+            is Ge -> "b.ge"
+            else -> TODO("Unsupported $prev")
+        }
+        genInstr("$mnemo _${inst.target.label!!.name}")
+    }
+
+    private fun genCmp(inst: Ge) {
+        // todo assign value to target
+        prevCmp = inst
+        genInstr("cmp ${regOrValue(inst.left)}, ${regOrValue(inst.right)}")
+    }
+
+
+    private fun regOrValue(source: IdentifierOrValue): Reg = when (source) {
+        is Identifier -> registers.registerFor(source)
+        is IntConstant -> imm(source.value)
+    }
+
     private fun genMove(inst: Move) {
         val target = registers.registerFor(inst.target)
-        val source = if (inst.source is Identifier)
-            registers.registerFor((inst.source as Identifier))
-        else imm((inst.source as IntConstant).value)
+        val source = regOrValue(inst.source)
         genInstr("mov $target, $source")
     }
 
@@ -78,16 +167,23 @@ class Aarch64Assembler(
     }
 
     private fun genCall(inst: FunctionCall) {
-        require(inst.functionName.name == "print") { "Only supporting print for now" }
-        genPrint(inst)
+        if (inst.functionName.name == "print") {
+            genPrint(inst)
+            return
+        }
+        for ((i, arg) in inst.args.withIndex()) {
+            genInstr("move x$i,${regOrValue(arg)}")
+        }
+        genInstr("bl _${inst.functionName.name}")
     }
+
 
     private fun genPrint(inst: FunctionCall) {
         // fetch the formatting string into x0
         genInstr("adrp x0, l_.str@PAGE")
         genInstr("add x0, x0, l_.str@PAGEOFF")
 
-        val num = registers.registerFor(inst.args[0])
+        val num = regOrValue(inst.args[0])
         genInstr("str $num, [sp]")
         genInstr("bl _printf")
     }

@@ -36,8 +36,11 @@ interface BinaryInstruction {
     fun negate(): Instruction
 }
 
-data class ArrayRead(val target: Identifier, val arrayBase: Identifier, val arrIndex: Identifier) : Instruction("AREAD")
-data class ArrayWrite(val arr: Identifier, val arrIndex: Identifier, val value: Identifier) : Instruction("AWRITE")
+data class ArrayRead(val target: Identifier, var arrayBase: Identifier, var arrIndex: IdentifierOrValue) :
+    Instruction("AREAD")
+
+data class ArrayWrite(var arr: Identifier, var arrIndex: IdentifierOrValue, var value: IdentifierOrValue) :
+    Instruction("AWRITE")
 
 class Move(val target: Identifier, var source: IdentifierOrValue) : Instruction("MOV")
 class Not(val target: Identifier, val source: Identifier) : Instruction("NOT")
@@ -164,7 +167,7 @@ class DirectJump(targetIndex: Int = -1) : JumpInstruction(targetIndex, "JMP")
 
 class CondJump(var condition: Identifier, targetIndex: Int = -1) : JumpInstruction(targetIndex, "CJMP")
 
-class FunctionCall(val target: Identifier, val functionName: Identifier, val args: List<Identifier>) :
+class FunctionCall(val target: Identifier, val functionName: Identifier, val args: MutableList<IdentifierOrValue>) :
     Instruction("CALL")
 
 class Ret(var value: IdentifierOrValue?) : Instruction("RET")

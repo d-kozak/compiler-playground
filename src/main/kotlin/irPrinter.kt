@@ -99,7 +99,9 @@ private class PrintingScope {
 
 
     private fun appendArrayWrite(inst: ArrayWrite) {
-        buffer.append(inst.arr)
+        buffer
+            .append('\t')
+            .append(inst.arr)
             .append('[')
             .append(inst.arrIndex)
             .append("] = ")

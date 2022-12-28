@@ -57,6 +57,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Get rid of unnecessary NOT ops before conditionals. Conditionals can be inverted instead.
 - [x] Restructure main and provide proper option handling for various modes of the compiler.
 - [x] Command line build command and launcher.
+- [x] Implement removal of variables with zero usages (no data flow necessary).
+- [x] Propagate constants with single definitions (again no data flow necessary).
 - [ ] Support for measuring performance.
 - [ ] Clear and formalize the representation for values for interpreters
 - [ ] Nicer error reporting, ideally showing the code the threw failed.

@@ -116,9 +116,15 @@ class IrInterpreter(val functions: Map<Identifier, IrFunction>) {
         for ((i, param) in func.params.withIndex()) {
             currentScope.insert(param, args[i])
         }
-        val res = execute(func.instructions)
-        popScope()
-        return res
+        try {
+            val res = execute(func.instructions)
+            popScope()
+            return res
+        } catch (ex: SemanticError) {
+            // todo real 'program' stack trace?
+            semanticError(ex.message + " in function ${func.name}")
+        }
+
     }
 
     private fun execute(instructions: Array<Instruction>): Value? {

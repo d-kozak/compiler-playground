@@ -1,7 +1,10 @@
 package passes.basicblock
 
+import ArrayRead
+import ArrayWrite
 import BasicBlock
 import BinaryInstruction
+import FunctionCall
 import Identifier
 import IdentifierOrValue
 import Move
@@ -19,6 +22,14 @@ class DirectConstantPropagationPass : BasicBlockPass {
                     values[instruction.target] = nSource ?: instruction.source
                 }
 
+                instruction is FunctionCall -> {
+                    for ((i, arg) in instruction.args.withIndex()) {
+                        val narg = values[arg]
+                        if (narg != null)
+                            instruction.args[i] = narg
+                    }
+                }
+
                 instruction is BinaryInstruction -> {
                     val nLeft = values[instruction.left]
                     if (nLeft != null)
@@ -34,6 +45,22 @@ class DirectConstantPropagationPass : BasicBlockPass {
                     val nx = values[x]
                     if (nx != null)
                         instruction.value = nx
+                }
+
+                instruction is ArrayRead -> {
+                    val nArr = values[instruction.arrayBase]
+                    if (nArr != null) instruction.arrayBase = nArr as Identifier
+                    val nIndex = values[instruction.arrIndex]
+                    if (nIndex != null) instruction.arrIndex = nIndex
+                }
+
+                instruction is ArrayWrite -> {
+                    val nArr = values[instruction.arr]
+                    if (nArr != null) instruction.arr = nArr as Identifier
+                    val nIndex = values[instruction.arrIndex]
+                    if (nIndex != null) instruction.arrIndex = nIndex
+                    val nValue = values[instruction.value]
+                    if (nValue != null) instruction.value = nValue
                 }
             }
         }
