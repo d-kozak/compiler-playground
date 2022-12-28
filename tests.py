@@ -15,12 +15,20 @@ ZIP_FILE = os.path.join(GRADLE_OUTPUT_DIR, ZIP_FILE_NAME)
 LAUNCHER = os.path.join(PROJ_DIR, f"{VERSION_NAME}/bin/compiler-playground")
 
 
+class FailedProc:
+    def __init__(self):
+        self.returncode = 1
+
+
 def exec_cmd(cmd, fail_on_error=False):
-    proc = subprocess.run(cmd, shell=True, universal_newlines=True)
-    if fail_on_error and proc.returncode != 0:
-        print(f"Command {cmd} failed...")
-        sys.exit(1)
-    return proc
+    try:
+        proc = subprocess.run(cmd, shell=True, universal_newlines=True, timeout=3)
+        if fail_on_error and proc.returncode != 0:
+            print(f"Command {cmd} failed...")
+            sys.exit(1)
+        return proc
+    except subprocess.TimeoutExpired:
+        return FailedProc()
 
 
 def build_project():

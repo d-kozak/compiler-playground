@@ -45,6 +45,11 @@ private class Registers {
         return Reg("x${free++}")
     }
 
+    fun clear() {
+        // TODO fix
+//        free = 19
+    }
+
 }
 
 class Aarch64Assembler(
@@ -59,8 +64,10 @@ class Aarch64Assembler(
         require(main != null) { "Main not found" }
         header()
 
-        for (f in irFunctions)
+        for (f in irFunctions) {
             genFunction(f)
+            registers.clear()
+        }
 
         buildIns()
         footer()
@@ -257,7 +264,6 @@ _alloc_arr:                             ; @alloc_arr
             genInstr("mov x0, ${regOrValue(value)}")
         }
         functionEpilogue(null)
-        genInstr("ret")
     }
 
 
