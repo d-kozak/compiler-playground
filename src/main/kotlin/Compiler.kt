@@ -1,14 +1,16 @@
 import asm.Aarch64Assembler
-import passes.RemoveCompletelyUnusedAssignments
-import passes.RemoveNoopPass
-import passes.SimplifyJumpConditions
+import passes.*
 import passes.basicblock.DirectConstantPropagationPass
 import passes.cfg.PropagateVariablesWithSingleWrites
-import passes.setInstructionIndexes
 import java.io.File
 
 
-val ALL_TOP_LEVEL_PASSES = listOf(SimplifyJumpConditions(), RemoveCompletelyUnusedAssignments(), RemoveNoopPass())
+val ALL_TOP_LEVEL_PASSES = listOf(
+    SimplifyJumpConditions(),
+    EvaluateConstantExpressions(),
+    RemoveCompletelyUnusedAssignments(),
+    RemoveNoopPass()
+)
 val ALL_BLOCK_LEVEL_PASSES = listOf(DirectConstantPropagationPass())
 val ALL_CFG_PASSES = listOf(PropagateVariablesWithSingleWrites())
 
@@ -18,7 +20,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/print_arr.prog"
+        val fileName = config.inputFile ?: "programs/source/selection_sort.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)

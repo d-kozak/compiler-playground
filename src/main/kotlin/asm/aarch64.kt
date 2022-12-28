@@ -3,9 +3,11 @@ package asm
 import Add
 import ArrayRead
 import ArrayWrite
+import BinaryInstruction
 import CondJump
 import DebugDump
 import DirectJump
+import Eq
 import FunctionCall
 import Ge
 import Identifier
@@ -23,19 +25,21 @@ data class Reg(val name: String) {
     }
 }
 
+// todo this should be function-specific
 private class Registers {
     var free = 19
     var LIM = 28
 
     val assigned = mutableMapOf<Identifier, Reg>()
     fun registerFor(id: Identifier): Reg {
-        return assigned.computeIfAbsent(id, this::nextRegister)
+        return assigned.computeIfAbsent(id) { nextRegister() }
     }
 
-    private fun nextRegister(identifier: Identifier): Reg {
-//        require(free <= LIM) { "Out of registers" }
+    fun nextRegister(): Reg {
+        require(free <= LIM) { "Out of registers" }
         return Reg("x${free++}")
     }
+
 }
 
 class Aarch64Assembler(
@@ -59,12 +63,39 @@ class Aarch64Assembler(
 
     private fun buildIns() {
         allocArray()
+        assertion()
+    }
+
+    private fun assertion() {
+        val code = """
+    .globl _my_assert
+    .p2align 2
+    
+_my_assert:
+    sub sp, sp, #32
+    stp x29, x30, [sp, #16]
+    add x29, sp, #16
+    cbnz w0, _succ
+    
+    adrp x0, l_.str.1@PAGE
+    add x0,x0, l_.str.1@PAGEOFF
+    bl _printf
+    mov x0, #1
+    bl _exit
+
+_succ:
+    ldp x29, x30, [sp, #16]
+    add sp, sp, #32
+    ret
+        """
+        buffer.append(code)
     }
 
     private fun allocArray() {
         val code = """
     .globl	_alloc_arr                      ; -- Begin function alloc_arr
 	.p2align	2
+
 _alloc_arr:                             ; @alloc_arr
 ; %bb.0:
 	sub	sp, sp, #32                     ; =32
@@ -87,7 +118,7 @@ _alloc_arr:                             ; @alloc_arr
             gen(inst)
         }
         newline()
-        functionEpilogue()
+        functionEpilogue(f)
     }
 
     private fun gen(inst: Instruction) {
@@ -99,7 +130,8 @@ _alloc_arr:                             ; @alloc_arr
             is ArrayRead -> genArrayRead(inst)
             is Move -> genMove(inst)
             is FunctionCall -> genCall(inst)
-            is Ge -> genCmp(inst)
+            is Ge -> genCmp(inst, "ge")
+            is Eq -> genCmp(inst, "eq")
             is CondJump -> genCondJump(inst)
             is DirectJump -> genDirectJump(inst)
             is Noop -> genNoop(inst)
@@ -135,21 +167,17 @@ _alloc_arr:                             ; @alloc_arr
         genInstr("add ${registers.registerFor(inst.target)}, ${regOrValue(inst.left)}, ${regOrValue(inst.right)}")
     }
 
-
-    var prevCmp = null as Instruction?
+    var prevCmp = null as String?
     private fun genCondJump(inst: CondJump) {
         val prev = prevCmp ?: internalError("No test before condjump found")
-        val mnemo = when (prev) {
-            is Ge -> "b.ge"
-            else -> TODO("Unsupported $prev")
-        }
-        genInstr("$mnemo _${inst.target.label!!.name}")
+        prevCmp = null
+        genInstr("b.$prev _${inst.target.label!!.name}")
     }
 
-    private fun genCmp(inst: Ge) {
-        // todo assign value to target
-        prevCmp = inst
+    private fun genCmp(inst: BinaryInstruction, cc: String) {
+        prevCmp = cc
         genInstr("cmp ${regOrValue(inst.left)}, ${regOrValue(inst.right)}")
+        genInstr("cset ${regOrValue(inst.target)}, $cc")
     }
 
 
@@ -174,9 +202,13 @@ _alloc_arr:                             ; @alloc_arr
             return
         }
         for ((i, arg) in inst.args.withIndex()) {
-            genInstr("mov x$i,${regOrValue(arg)}")
+            genInstr("mov x$i, ${regOrValue(arg)}")
         }
-        val name = if (inst.functionName.name == "IntArray") "alloc_arr" else inst.functionName.name
+        val name = when (val n = inst.functionName.name) {
+            "IntArray" -> "alloc_arr"
+            "assert" -> "my_assert"
+            else -> n
+        }
         genInstr("bl _$name")
         genInstr("mov ${registers.registerFor(inst.target)}, x0")
     }
@@ -187,19 +219,33 @@ _alloc_arr:                             ; @alloc_arr
         genInstr("adrp x0, l_.str@PAGE")
         genInstr("add x0, x0, l_.str@PAGEOFF")
 
-        val num = regOrValue(inst.args[0])
-        genInstr("str $num, [sp]")
+        val arg = inst.args[0]
+        when (arg) {
+            is Identifier -> genInstr("str ${registers.registerFor(arg)}, [sp]")
+            is IntConstant -> {
+                val nxt = registers.nextRegister()
+                genInstr("mov $nxt, ${imm(arg.value)}")
+                genInstr("str $nxt, [sp]")
+            }
+        }
         genInstr("bl _printf")
     }
 
-    private fun functionEpilogue() {
+    private fun functionEpilogue(f: IrFunction) {
+        if (f.name.name == "main") {
+            // todo probably not the best way to achieve this
+            genInstr("mov x0, #0")
+        }
         genInstr("ldp x29, x30, [sp, #32]")
         genInstr("add sp, sp, #48")
         genInstr("ret")
+        newline()
     }
 
     private fun functionPrologue(f: IrFunction) {
         val name = "_${f.name}"
+        genInstr(".globl $name")
+        genInstr(".p2align\t2")
         genLabel(name)
         genInstr("sub sp, sp, #48")
         genInstr("stp x29, x30, [sp, #32]")
@@ -222,8 +268,7 @@ _alloc_arr:                             ; @alloc_arr
         val txt = """  
     .section	__TEXT,__text,regular,pure_instructions
     .build_version macos, 11, 0	sdk_version 11, 3
-    .globl	_main                           ; -- Begin function main
-    .p2align	2"""
+ """
         buffer.appendLine(txt)
         newline()
     }
@@ -236,7 +281,10 @@ _alloc_arr:                             ; @alloc_arr
         val txt = """
     .section	__TEXT,__cstring,cstring_literals
 l_.str:                                 ; @.str
-    .asciz	"%d\n""""
+    .asciz	"%d\n"
+l_.str.1:
+	.asciz	"Assertion failed"
+    """
         buffer.appendLine(txt)
     }
 }

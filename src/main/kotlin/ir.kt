@@ -26,7 +26,7 @@ sealed class Instruction(var name: String) {
     var index: Int = -1
 }
 
-interface BinaryInstruction {
+sealed interface BinaryInstruction {
     val target: Identifier
     var left: IdentifierOrValue
     var right: IdentifierOrValue
