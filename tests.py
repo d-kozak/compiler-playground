@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 PROJ_DIR = os.path.dirname(os.path.realpath(__file__))
+DUMP_DIR = os.path.join(PROJ_DIR, "tmp")
 TESTS_DIR = os.path.join(PROJ_DIR, "programs/source")
 GRADLE_OUTPUT_DIR = os.path.join(PROJ_DIR, "build/distributions")
 VERSION_NAME = "compiler-playground-1.0-SNAPSHOT"
@@ -27,10 +28,21 @@ def build_project():
     exec_cmd(f"unzip -u {ZIP_FILE}", fail_on_error=True)
 
 
+def compile_and_run(source_file):
+    asm_file = os.path.join(DUMP_DIR, f"{os.path.basename(os.path.realpath(source_file))}.s")
+    exec_cmd(f"gcc -S {asm_file}")
+
+
 def run_test(source_file):
     print(f"Running {source_file}")
+
+    # interpreter
     proc = exec_cmd(f"{LAUNCHER} {source_file}")
-    return proc.returncode == 0
+    if proc.returncode != 0:
+        return False
+
+    # compilation
+    return compile_and_run(source_file)
 
 
 def main():

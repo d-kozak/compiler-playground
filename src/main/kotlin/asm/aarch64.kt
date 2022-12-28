@@ -10,12 +10,15 @@ import DirectJump
 import Eq
 import FunctionCall
 import Ge
+import Gt
 import Identifier
 import IdentifierOrValue
 import Instruction
 import IntConstant
 import IrFunction
+import Mod
 import Move
+import Neq
 import Noop
 import internalError
 
@@ -126,12 +129,15 @@ _alloc_arr:                             ; @alloc_arr
         if (label != null) genLabel("_${label.name}")
         when (inst) {
             is Add -> genAdd(inst)
+            is Mod -> genMod(inst)
             is ArrayWrite -> genArrayWrite(inst)
             is ArrayRead -> genArrayRead(inst)
             is Move -> genMove(inst)
             is FunctionCall -> genCall(inst)
             is Ge -> genCmp(inst, "ge")
             is Eq -> genCmp(inst, "eq")
+            is Neq -> genCmp(inst, "ne")
+            is Gt -> genCmp(inst, "gt")
             is CondJump -> genCondJump(inst)
             is DirectJump -> genDirectJump(inst)
             is Noop -> genNoop(inst)
@@ -165,6 +171,19 @@ _alloc_arr:                             ; @alloc_arr
 
     private fun genAdd(inst: Add) {
         genInstr("add ${registers.registerFor(inst.target)}, ${regOrValue(inst.left)}, ${regOrValue(inst.right)}")
+    }
+
+    private fun genMod(inst: Mod) {
+        val target = registers.registerFor(inst.target)
+        val left = regOrValue(inst.left)
+        val right = if (inst.right is IntConstant) {
+            val nxt = registers.nextRegister()
+            genInstr("mov $nxt, ${imm((inst.right as IntConstant).value)}")
+            nxt
+        } else regOrValue(inst.right)
+        genInstr("sdiv $target, $left, $right")
+        genInstr("mul $target, $target, $right")
+        genInstr("subs $target, $left, $target")
     }
 
     var prevCmp = null as String?
@@ -215,6 +234,12 @@ _alloc_arr:                             ; @alloc_arr
 
 
     private fun genPrint(inst: FunctionCall) {
+        if (inst.args.isEmpty()) {
+            genInstr("adrp x0, l_.str.2@PAGE")
+            genInstr("add x0, x0, l_.str.2@PAGEOFF")
+            genInstr("bl _puts")
+            return
+        }
         // fetch the formatting string into x0
         genInstr("adrp x0, l_.str@PAGE")
         genInstr("add x0, x0, l_.str@PAGEOFF")
@@ -284,6 +309,8 @@ l_.str:                                 ; @.str
     .asciz	"%d\n"
 l_.str.1:
 	.asciz	"Assertion failed"
+l_.str.2:
+    .asciz ""
     """
         buffer.appendLine(txt)
     }
