@@ -118,19 +118,21 @@ _alloc_arr:                             ; @alloc_arr
     private fun genArrayRead(inst: ArrayRead) {
         val arr = regOrValue(inst.arrayBase)
         val index = regOrValue(inst.arrIndex)
-        val target = registers.registerFor(inst.target)
-        genInstr("ldr $target [$arr, $index, lsl #2]")
+        // todo fix this mess
+        val target = 'w' + registers.registerFor(inst.target).name.substring(1)
+        genInstr("ldr $target, [$arr, $index, lsl #2]")
     }
 
     private fun genArrayWrite(inst: ArrayWrite) {
         val arr = regOrValue(inst.arr)
         val index = regOrValue(inst.arrIndex)
-        val value = regOrValue(inst.value)
-        genInstr("str $value [$arr, $index, lsl #2]")
+        // todo fix this mess
+        val value = 'w' + regOrValue(inst.value).name.substring(1)
+        genInstr("str $value, [$arr, $index, lsl #2]")
     }
 
     private fun genAdd(inst: Add) {
-        genInstr("add ${registers.registerFor(inst.target)}, ${regOrValue(inst.left)}, ${regOrValue(inst.right)}}")
+        genInstr("add ${registers.registerFor(inst.target)}, ${regOrValue(inst.left)}, ${regOrValue(inst.right)}")
     }
 
 
@@ -172,9 +174,11 @@ _alloc_arr:                             ; @alloc_arr
             return
         }
         for ((i, arg) in inst.args.withIndex()) {
-            genInstr("move x$i,${regOrValue(arg)}")
+            genInstr("mov x$i,${regOrValue(arg)}")
         }
-        genInstr("bl _${inst.functionName.name}")
+        val name = if (inst.functionName.name == "IntArray") "alloc_arr" else inst.functionName.name
+        genInstr("bl _$name")
+        genInstr("mov ${registers.registerFor(inst.target)}, x0")
     }
 
 

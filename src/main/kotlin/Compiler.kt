@@ -18,7 +18,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/selection_sort.prog"
+        val fileName = config.inputFile ?: "programs/source/print_arr.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
@@ -26,7 +26,7 @@ class Compiler(
 
             interpret(irFunctions)
 
-//            lowerToAsm(irFunctions, fileName)
+            lowerToAsm(irFunctions, fileName)
         } finally {
             debugDump.onCompilationFinished()
         }
