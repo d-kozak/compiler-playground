@@ -20,7 +20,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/print_arr.prog"
+        val fileName = config.inputFile ?: "programs/source/for_loop.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
@@ -37,7 +37,7 @@ class Compiler(
     private fun lowerToAsm(irFunctions: MutableList<IrFunction>, fileName: String) {
         val assembler = Aarch64Assembler(irFunctions, debugDump)
         assembler.gen()
-        println(assembler.buffer.toString())
+        // println(assembler.buffer.toString())
         debugDump.asm(fileName, assembler)
     }
 

@@ -20,6 +20,8 @@ import Mod
 import Move
 import Neq
 import Noop
+import Not
+import Ret
 import internalError
 
 data class Reg(val name: String) {
@@ -138,9 +140,11 @@ _alloc_arr:                             ; @alloc_arr
             is Eq -> genCmp(inst, "eq")
             is Neq -> genCmp(inst, "ne")
             is Gt -> genCmp(inst, "gt")
+            is Not -> genNot(inst)
             is CondJump -> genCondJump(inst)
             is DirectJump -> genDirectJump(inst)
             is Noop -> genNoop(inst)
+            is Ret -> genRet(inst)
             else -> internalError("Unsupported instruction$inst")
         }
     }
@@ -187,10 +191,17 @@ _alloc_arr:                             ; @alloc_arr
     }
 
     var prevCmp = null as String?
+
     private fun genCondJump(inst: CondJump) {
-        val prev = prevCmp ?: internalError("No test before condjump found")
-        prevCmp = null
-        genInstr("b.$prev _${inst.target.label!!.name}")
+        val label = inst.target.label!!.name
+        val prev = prevCmp
+        if (prev != null) {
+            prevCmp = null
+            genInstr("b.$prev _$label")
+        } else {
+            // just check whether the value is non-zero
+            genInstr("cbnz ${registers.registerFor(inst.condition)}, _$label")
+        }
     }
 
     private fun genCmp(inst: BinaryInstruction, cc: String) {
@@ -199,11 +210,18 @@ _alloc_arr:                             ; @alloc_arr
         genInstr("cset ${regOrValue(inst.target)}, $cc")
     }
 
+    private fun genNot(inst: Not) {
+        val source = registers.registerFor(inst.source)
+        val target = registers.registerFor(inst.target)
+        genInstr("cmp $source, #0")
+        genInstr("cset $target, eq")
+    }
 
     private fun regOrValue(source: IdentifierOrValue): Reg = when (source) {
         is Identifier -> registers.registerFor(source)
         is IntConstant -> imm(source.value)
     }
+
 
     private fun genMove(inst: Move) {
         val target = registers.registerFor(inst.target)
@@ -232,6 +250,16 @@ _alloc_arr:                             ; @alloc_arr
         genInstr("mov ${registers.registerFor(inst.target)}, x0")
     }
 
+    private fun genRet(inst: Ret) {
+        // todo jump to end
+        val value = inst.value
+        if (value != null) {
+            genInstr("mov x0, ${regOrValue(value)}")
+        }
+        functionEpilogue(null)
+        genInstr("ret")
+    }
+
 
     private fun genPrint(inst: FunctionCall) {
         if (inst.args.isEmpty()) {
@@ -256,8 +284,8 @@ _alloc_arr:                             ; @alloc_arr
         genInstr("bl _printf")
     }
 
-    private fun functionEpilogue(f: IrFunction) {
-        if (f.name.name == "main") {
+    private fun functionEpilogue(f: IrFunction?) {
+        if (f != null && f.name.name == "main") {
             // todo probably not the best way to achieve this
             genInstr("mov x0, #0")
         }

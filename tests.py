@@ -29,14 +29,22 @@ def build_project():
 
 
 def compile_and_run(source_file):
-    asm_file = os.path.join(DUMP_DIR, f"{os.path.basename(os.path.realpath(source_file))}.s")
-    exec_cmd(f"gcc -S {asm_file}")
+    file_name = os.path.basename(os.path.realpath(source_file))
+    asm_file = os.path.join(DUMP_DIR, f"{file_name}.s")
+    binary = os.path.join(DUMP_DIR, f"{file_name}.out")
+    print("Linking")
+    res = exec_cmd(f"gcc {asm_file} -o {binary}")
+    if res.returncode != 0:
+        return False
+    print("Running compiled binary")
+    return exec_cmd(binary).returncode == 0
 
 
 def run_test(source_file):
     print(f"Running {source_file}")
 
     # interpreter
+    print("Interpreter")
     proc = exec_cmd(f"{LAUNCHER} {source_file}")
     if proc.returncode != 0:
         return False
@@ -47,9 +55,12 @@ def run_test(source_file):
 
 def main():
     build_project()
+    pattern = sys.argv[1] if len(sys.argv) == 2 else ""
     source_files = glob.glob(f"{TESTS_DIR}/*.prog")
     failed = []
     for file in source_files:
+        if pattern not in file:
+            continue
         if not run_test(file):
             failed.append(file)
     if failed:
