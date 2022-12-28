@@ -1,5 +1,7 @@
+import asm.Aarch64Assembler
 import java.io.FileWriter
 import kotlin.io.path.Path
+import kotlin.io.path.name
 
 val DEFAULT_DUMP_DIR = Path("/Users/dkozak-mac-uni/projects/compiler-playground/tmp")
 
@@ -50,5 +52,11 @@ class DebugDump(val config: CompilerConfig) {
     fun dumpFinalCfg(cfg: ControlFlowGraph) {
         val targetFile = DEFAULT_DUMP_DIR.resolve("${cfg.function.name}.dot")
         FileWriter(targetFile.toFile()).use { it.write(dumpCfg(cfg)) }
+    }
+
+    fun asm(fileName: String, assembler: Aarch64Assembler) {
+        val path = Path(fileName)
+        val targetFile = DEFAULT_DUMP_DIR.resolve("${path.name}.s")
+        FileWriter(targetFile.toFile()).use { it.write(assembler.buffer.toString()) }
     }
 }

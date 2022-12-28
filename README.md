@@ -37,6 +37,8 @@ transform it to lower level IR and interpret it. Now I am considering what to do
 - [x] Constant propagation inside basic blocks
 - [x] Assert statement/call. Mainly to verify test programs without having to diff their stdout.
 - [x] More test programs to verify the current infrastructure (and extend/fix if necessary).
+- [x] Create the backend - generate real assembly
+- [ ] Extend the backend to support all programs in the test suite.
 - [ ] Data-flow analysis
 - [ ] SSA form
 - [x] Figure out how to output and debug optimization passes so that the output does not get out of hands.

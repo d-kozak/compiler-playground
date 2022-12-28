@@ -1,3 +1,4 @@
+import asm.Aarch64Assembler
 import passes.RemoveNoopPass
 import passes.SimplifyJumpConditions
 import passes.basicblock.DirectConstantPropagationPass
@@ -15,13 +16,18 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/selection_sort.prog"
+        val fileName = config.inputFile ?: "programs/source/print_single.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
             optimize(irFunctions)
 
             interpret(irFunctions)
+
+            val assembler = Aarch64Assembler(irFunctions, debugDump)
+            assembler.gen()
+            println(assembler.buffer.toString())
+            debugDump.asm(fileName, assembler)
         } finally {
             debugDump.onCompilationFinished()
         }
