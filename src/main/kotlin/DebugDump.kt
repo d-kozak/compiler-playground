@@ -57,6 +57,6 @@ class DebugDump(val config: CompilerConfig) {
     fun asm(fileName: String, assembler: Aarch64Assembler) {
         val path = Path(fileName)
         val targetFile = DEFAULT_DUMP_DIR.resolve("${path.name}.s")
-        FileWriter(targetFile.toFile()).use { it.write(assembler.buffer.toString()) }
+        FileWriter(targetFile.toFile()).use { it.write(assembler.dumpAsm()) }
     }
 }
