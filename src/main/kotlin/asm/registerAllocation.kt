@@ -26,13 +26,19 @@ fun registerAllocation(from: InstructionOrLabel, to: InstructionOrLabel) {
     var curr = from
     while (true) {
         if (curr is AsmInstruction) {
-            for ((i, param) in curr.params.withIndex()) {
-                if (param is VirtualRegister)
-                    curr.params[i] = strategy.assign(param)
-            }
+            processParams(curr.params, strategy)
         }
         if (curr === to)
             break
         curr = curr.next!!
+    }
+}
+
+fun processParams(params: MutableList<InstructionParameter>, strategy: AssignFirstFreeStrategy) {
+    for ((i, param) in params.withIndex()) {
+        if (param is VirtualRegister)
+            params[i] = strategy.assign(param)
+        else if (param is ParamList)
+            processParams(param.list, strategy)
     }
 }

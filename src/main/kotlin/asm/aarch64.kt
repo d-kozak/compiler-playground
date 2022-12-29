@@ -107,6 +107,9 @@ class Aarch64Assembler(
     lateinit var head: InstructionOrLabel
     lateinit var last: InstructionOrLabel
 
+    private val fixTarget = mutableListOf<AsmInstruction>()
+
+
     fun gen() {
         val main = irFunctions.find { it.name.name == "main" }
         require(main != null) { "Main not found" }
@@ -116,10 +119,18 @@ class Aarch64Assembler(
             genFunction(f)
         }
 
+        fixTargets()
+
         // todo builtins
         footer()
     }
 
+    private fun fixTargets() {
+        for (inst in fixTarget) {
+            val prev = inst.params[0].asmName().substring(1)
+            inst.params[0] = MachineRegister("w$prev")
+        }
+    }
 
     private fun genFunction(f: IrFunction) {
         val from = last
@@ -169,13 +180,23 @@ class Aarch64Assembler(
     }
 
     private fun genArrayRead(inst: ArrayRead) {
-        // todo fix x->w
-        inst("ldr", vreg(inst.target.name), lst(regOrValue(inst.arrayBase), regOrValue(inst.arrIndex), Id("lsl #2")))
+        fixTarget.add(
+            inst(
+                "ldr",
+                vreg(inst.target.name),
+                lst(regOrValue(inst.arrayBase), regOrValue(inst.arrIndex), Id("lsl #2"))
+            ) as AsmInstruction
+        )
     }
 
     private fun genArrayWrite(inst: ArrayWrite) {
-        // todo fix x->w
-        inst("str", regOrValue(inst.value), lst(regOrValue(inst.arr), regOrValue(inst.arrIndex), Id("lsl #2")))
+        fixTarget.add(
+            inst(
+                "str",
+                regOrValue(inst.value),
+                lst(regOrValue(inst.arr), regOrValue(inst.arrIndex), Id("lsl #2"))
+            ) as AsmInstruction
+        )
     }
 
     private fun genAdd(inst: Add) {
@@ -308,10 +329,11 @@ class Aarch64Assembler(
     private fun inst(mnemo: String, vararg params: InstructionParameter) =
         inst(AsmInstruction(mnemo, params.toMutableList()))
 
-    private fun inst(i: InstructionOrLabel) {
+    private fun inst(i: InstructionOrLabel): InstructionOrLabel {
         last.next = i
         i.prev = last
         last = i
+        return i
     }
 
     private fun header() {

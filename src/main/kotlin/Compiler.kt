@@ -20,7 +20,7 @@ class Compiler(
 
     private val debugDump = DebugDump(config)
     fun runAll() {
-        val fileName = config.inputFile ?: "programs/source/print_single.prog"
+        val fileName = config.inputFile ?: "programs/source/print_arr.prog"
         try {
             val root = parseFile(fileName)
             val irFunctions = lowerToIr(root)
