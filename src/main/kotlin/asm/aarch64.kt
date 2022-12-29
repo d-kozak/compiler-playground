@@ -85,9 +85,11 @@ data class LinkerDirective(val content: String) : InstructionOrLabel() {
 }
 
 class Empty : InstructionOrLabel() {
-
     override fun lower(): String = ""
+}
 
+data class BuiltInMacroInstruction(val content: String) : InstructionOrLabel() {
+    override fun lower(): String = content
 }
 
 private class VRegGen {
@@ -109,6 +111,10 @@ class Aarch64Assembler(
 
     private val fixTarget = mutableListOf<AsmInstruction>()
 
+    private val builtIns = mutableListOf(
+        Aarch64BuiltIn("IntArray", "alloc_arr")
+    )
+
 
     fun gen() {
         val main = irFunctions.find { it.name.name == "main" }
@@ -121,7 +127,7 @@ class Aarch64Assembler(
 
         fixTargets()
 
-        // todo builtins
+        includeBuiltIns()
         footer()
     }
 
@@ -129,6 +135,12 @@ class Aarch64Assembler(
         for (inst in fixTarget) {
             val prev = inst.params[0].asmName().substring(1)
             inst.params[0] = MachineRegister("w$prev")
+        }
+    }
+
+    private fun includeBuiltIns() {
+        for (builtIn in builtIns) {
+            inst(BuiltInMacroInstruction(builtIn.loadContent()))
         }
     }
 
@@ -258,10 +270,13 @@ class Aarch64Assembler(
         for ((i, arg) in inst.args.withIndex()) {
             inst("mov", reg("x$i"), regOrValue(arg))
         }
-        val name = when (val n = inst.functionName.name) {
-            "IntArray" -> "alloc_arr"
-            "assert" -> "my_assert"
-            else -> n
+        var name = inst.functionName.name
+        for (builtIn in builtIns) {
+            if (builtIn.name == name) {
+                name = builtIn.asmName
+                builtIn.isUsed = true
+                break
+            }
         }
         inst("bl", Id("_$name"))
         inst("mov", vreg(inst.target.name), reg("x0"))
