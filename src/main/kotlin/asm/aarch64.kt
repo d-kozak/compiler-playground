@@ -122,6 +122,7 @@ class Aarch64Assembler(
 
 
     private fun genFunction(f: IrFunction) {
+        val from = last
         functionPrologue(f)
         // get ptr to last prologue inst
         for (inst in f.instructions) {
@@ -131,6 +132,9 @@ class Aarch64Assembler(
         // append movs to stack at the beginning
         // append movs from stack to the end
         functionEpilogue(f)
+        val to = last
+
+        registerAllocation(from, to)
     }
 
     private fun gen(inst: Instruction) {
@@ -326,7 +330,7 @@ class Aarch64Assembler(
     private fun footer() {
         inst(LinkerDirective(".section	__TEXT,__cstring,cstring_literals"))
         inst(Label("l_.str"))
-        inst(LinkerDirective(""".asciz "%d" """))
+        inst(LinkerDirective(""".asciz "%d\n" """))
         inst(Label("l_.str.1"))
         inst(LinkerDirective(""".asciz "Assertion failed" """))
         inst(Label("l_.str.2"))
