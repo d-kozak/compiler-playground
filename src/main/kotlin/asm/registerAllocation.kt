@@ -14,7 +14,7 @@ class AssignFirstFreeStrategy {
     fun assign(vreg: VirtualRegister) = registers.computeIfAbsent(vreg) { nextFree() }
 
     private fun nextFree(): MachineRegister {
-        require(free <= LAST_FREE)
+        require(free <= LAST_FREE) { "out of registers" }
         return MachineRegister("x${free++}")
     }
 
@@ -25,7 +25,7 @@ fun registerAllocation(from: InstructionOrLabel, to: InstructionOrLabel) {
 
     var curr = from
     while (true) {
-        if (curr is AsmInstruction) {
+        if (curr is ArmInstruction) {
             processParams(curr.params, strategy)
         }
         if (curr === to)

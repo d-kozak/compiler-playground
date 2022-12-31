@@ -16,6 +16,8 @@ import IdentifierOrValue
 import Instruction
 import IntConstant
 import IrFunction
+import Le
+import Lt
 import Mod
 import Move
 import Neq
@@ -70,11 +72,47 @@ sealed class InstructionOrLabel {
     var next: InstructionOrLabel? = null
 }
 
-data class AsmInstruction(val mnemo: String, val params: MutableList<InstructionParameter>) : InstructionOrLabel() {
+open class ArmInstruction(val mnemo: String, val params: MutableList<InstructionParameter> = mutableListOf()) :
+    InstructionOrLabel() {
+
+    constructor(mnemo: String, vararg params: InstructionParameter) : this(mnemo, params.toMutableList())
 
     override fun lower(): String = "\t$mnemo ${params.joinToString { it.asmName() }}"
 
+
+    class Nop : ArmInstruction("nop")
+
+    class Branch(label: Id) : ArmInstruction("b", label)
+
+    class CondBranch(cc: String, label: Id) : ArmInstruction("b.$cc", label)
+
+    class Cbnz(condition: InstructionParameter, label: Id) : ArmInstruction("cbnz", condition, label)
+
+    class Cmp(left: InstructionParameter, right: InstructionParameter) : ArmInstruction("cmp", left, right)
+
+    class Cset(target: InstructionParameter, cc: Id) : ArmInstruction("cset", target, cc)
+
+    class Ldr(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("ldr", target, source)
+    class Str(source: InstructionParameter, target: InstructionParameter) : ArmInstruction("str", source, target)
+
+    class Binary(mnemo: String, target: InstructionParameter, left: InstructionParameter, right: InstructionParameter) :
+        ArmInstruction(mnemo, target, left, right)
+
+    class Mov(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("mov", target, source)
+
+    class Bl(label: Id) : ArmInstruction("bl", label)
+
+    class Adrp(target: InstructionParameter, label: Id) : ArmInstruction("adrp", target, label)
+
+    class Stp(regLeft: InstructionParameter, regRight: InstructionParameter, target: InstructionParameter) :
+        ArmInstruction("stp", regLeft, regRight, target)
+
+    class Ldp(regLeft: InstructionParameter, regRight: InstructionParameter, source: InstructionParameter) :
+        ArmInstruction("ldp", regLeft, regRight, source)
+
+    class Ret : ArmInstruction("ret")
 }
+
 
 data class Label(val name: String) : InstructionOrLabel() {
     override fun lower(): String = "$name:"
@@ -109,7 +147,7 @@ class Aarch64Assembler(
     lateinit var head: InstructionOrLabel
     lateinit var last: InstructionOrLabel
 
-    private val fixTarget = mutableListOf<AsmInstruction>()
+    private val fixTarget = mutableListOf<ArmInstruction>()
 
     private val builtIns = mutableListOf(
         Aarch64BuiltIn("IntArray", "alloc_arr")
@@ -160,6 +198,20 @@ class Aarch64Assembler(
         registerAllocation(from, to)
     }
 
+    private fun asList(from: InstructionOrLabel, to: InstructionOrLabel): List<InstructionOrLabel> {
+        val res = mutableListOf<InstructionOrLabel>()
+
+        var curr = from
+        while (true) {
+            res.add(curr)
+
+            if (curr === to) break
+            curr = curr.next!!
+        }
+
+        return res
+    }
+
     private fun gen(inst: Instruction) {
         val label = inst.label
         if (label != null) inst(Label("_${label.name}"))
@@ -170,10 +222,12 @@ class Aarch64Assembler(
             is ArrayRead -> genArrayRead(inst)
             is Move -> genMove(inst)
             is FunctionCall -> genCall(inst)
-            is Ge -> genCmp(inst, "ge")
             is Eq -> genCmp(inst, "eq")
             is Neq -> genCmp(inst, "ne")
+            is Lt -> genCmp(inst, "lt")
+            is Le -> genCmp(inst, "le")
             is Gt -> genCmp(inst, "gt")
+            is Ge -> genCmp(inst, "ge")
             is Not -> genNot(inst)
             is CondJump -> genCondJump(inst)
             is DirectJump -> genDirectJump(inst)
@@ -184,35 +238,37 @@ class Aarch64Assembler(
     }
 
     private fun genNoop(inst: Noop) {
-        inst("nop")
+        inst(ArmInstruction.Nop())
     }
 
     private fun genDirectJump(inst: DirectJump) {
-        inst("b", Id("_${inst.target.label!!.name}"))
+        inst(ArmInstruction.Branch(Id("_${inst.target.label!!.name}")))
     }
 
     private fun genArrayRead(inst: ArrayRead) {
         fixTarget.add(
             inst(
-                "ldr",
-                vreg(inst.target.name),
-                lst(regOrValue(inst.arrayBase), regOrValue(inst.arrIndex), Id("lsl #2"))
-            ) as AsmInstruction
+                ArmInstruction.Ldr(
+                    vreg(inst.target.name),
+                    lst(regOrValue(inst.arrayBase), regOrValue(inst.arrIndex), Id("lsl #2"))
+                )
+            ) as ArmInstruction
         )
     }
 
     private fun genArrayWrite(inst: ArrayWrite) {
         fixTarget.add(
             inst(
-                "str",
-                regOrValue(inst.value),
-                lst(regOrValue(inst.arr), regOrValue(inst.arrIndex), Id("lsl #2"))
-            ) as AsmInstruction
+                ArmInstruction.Str(
+                    regOrValue(inst.value),
+                    lst(regOrValue(inst.arr), regOrValue(inst.arrIndex), Id("lsl #2"))
+                )
+            ) as ArmInstruction
         )
     }
 
     private fun genAdd(inst: Add) {
-        inst("add", vreg(inst.target.name), regOrValue(inst.left), regOrValue(inst.right))
+        inst(ArmInstruction.Binary("add", vreg(inst.target.name), regOrValue(inst.left), regOrValue(inst.right)))
     }
 
     private fun genMod(inst: Mod) {
@@ -220,12 +276,12 @@ class Aarch64Assembler(
         val left = regOrValue(inst.left)
         val right = if (inst.right is IntConstant) {
             val nxt = vregs.next()
-            inst("mov", nxt, int((inst.right as IntConstant).value))
+            inst(ArmInstruction.Mov(nxt, int((inst.right as IntConstant).value)))
             nxt
         } else regOrValue(inst.right)
-        inst("sdiv", target, left, right)
-        inst("mul", target, target, right)
-        inst("subs", target, left, target)
+        inst(ArmInstruction.Binary("sdiv", target, left, right))
+        inst(ArmInstruction.Binary("mul", target, target, right))
+        inst(ArmInstruction.Binary("subs", target, left, target))
     }
 
     var prevCmp = null as String?
@@ -235,26 +291,26 @@ class Aarch64Assembler(
         val prev = prevCmp
         if (prev != null) {
             prevCmp = null
-            inst("b.$prev", Id("_$label"))
+            inst(ArmInstruction.CondBranch(prev, Id("_$label")))
         } else {
             // just check whether the value is non-zero
-            inst("cbnz", vreg(inst.condition.name), Id("_$label"))
+            inst(ArmInstruction.Cbnz(vreg(inst.condition.name), Id("_$label")))
         }
     }
 
     private fun genCmp(inst: BinaryInstruction, cc: String) {
         prevCmp = cc
-        inst("cmp", regOrValue(inst.left), regOrValue(inst.right))
-        inst("cset", vreg(inst.target.name), Id(cc))
+        inst(ArmInstruction.Cmp(regOrValue(inst.left), regOrValue(inst.right)))
+        inst(ArmInstruction.Cset(vreg(inst.target.name), Id(cc)))
     }
 
     private fun genNot(inst: Not) {
-        inst("cmp", vreg(inst.source.name), int(0))
-        inst("cset", vreg(inst.target.name), Id("eq"))
+        inst(ArmInstruction.Cmp(vreg(inst.source.name), int(0)))
+        inst(ArmInstruction.Cset(vreg(inst.target.name), Id("eq")))
     }
 
     private fun genMove(inst: Move) {
-        inst("mov", vreg(inst.target.name), regOrValue(inst.source))
+        inst(ArmInstruction.Mov(vreg(inst.target.name), regOrValue(inst.source)))
     }
 
 
@@ -268,7 +324,7 @@ class Aarch64Assembler(
             return
         }
         for ((i, arg) in inst.args.withIndex()) {
-            inst("mov", reg("x$i"), regOrValue(arg))
+            inst(ArmInstruction.Mov(reg("x$i"), regOrValue(arg)))
         }
         var name = inst.functionName.name
         for (builtIn in builtIns) {
@@ -278,40 +334,42 @@ class Aarch64Assembler(
                 break
             }
         }
-        inst("bl", Id("_$name"))
-        inst("mov", vreg(inst.target.name), reg("x0"))
+
+        inst(ArmInstruction.Bl(Id("_$name")))
+        inst(ArmInstruction.Mov(vreg(inst.target.name), reg("x0")))
     }
 
     private fun genRet(inst: Ret) {
         // todo jump to end
         val value = inst.value
         if (value != null) {
-            inst("mov", reg("x0"), regOrValue(value))
+            inst(ArmInstruction.Mov(reg("x0"), regOrValue(value)))
         }
         functionEpilogue(null)
     }
 
     private fun genPrint(inst: FunctionCall) {
         if (inst.args.isEmpty()) {
-            inst("adrp", reg("x0"), Id("l_.str.2@PAGE"))
-            inst("add", reg("x0"), reg("x0"), Id("l_.str.2@PAGEOFF"))
-            inst("bl", Id("_puts"))
+            inst(ArmInstruction.Adrp(reg("x0"), Id("l_.str.2@PAGE")))
+            inst(ArmInstruction.Binary("add", reg("x0"), reg("x0"), Id("l_.str.2@PAGEOFF")))
+            inst(ArmInstruction.Bl(Id("_puts")))
             return
         }
         // fetch the formatting string into x0
-        inst("adrp", reg("x0"), Id("l_.str@PAGE"))
-        inst("add", reg("x0"), reg("x0"), Id("l_.str@PAGEOFF"))
+        inst(ArmInstruction.Adrp(reg("x0"), Id("l_.str@PAGE")))
+        inst(ArmInstruction.Binary("add", reg("x0"), reg("x0"), Id("l_.str@PAGEOFF")))
 
         when (val arg = inst.args[0]) {
-            is Identifier -> inst("str", vreg(arg.name), lst(reg("sp")))
+            is Identifier ->
+                inst(ArmInstruction.Str(vreg(arg.name), lst(reg("sp"))))
 
             is IntConstant -> {
                 val nxt = vregs.next()
-                inst("mov", nxt, int(arg.value))
-                inst("str", nxt, lst(reg("sp")))
+                inst(ArmInstruction.Mov(nxt, int(arg.value)))
+                inst(ArmInstruction.Str(nxt, lst(reg("sp"))))
             }
         }
-        inst("bl", Id("_printf"))
+        inst(ArmInstruction.Bl(Id("_printf")))
     }
 
 
@@ -320,8 +378,8 @@ class Aarch64Assembler(
         inst(LinkerDirective(".globl $name"))
         inst(LinkerDirective(".p2align 2"))
         inst(Label(name))
-        inst("sub", reg("sp"), reg("sp"), int(48))
-        inst("stp", reg("x29"), reg("x30"), lst(reg("sp"), int(32)))
+        inst(ArmInstruction.Binary("sub", reg("sp"), reg("sp"), int(48)))
+        inst(ArmInstruction.Stp(reg("x29"), reg("x30"), lst(reg("sp"), int(32))))
         newline()
     }
 
@@ -333,16 +391,13 @@ class Aarch64Assembler(
     private fun functionEpilogue(f: IrFunction?) {
         if (f != null && f.name.name == "main") {
             // todo probably not the best way to achieve this
-            inst("mov", reg("x0"), int(0))
+            inst(ArmInstruction.Mov(reg("x0"), int(0)))
         }
-        inst("ldp", reg("x29"), reg("x30"), lst(reg("sp"), int(32)))
-        inst("add", reg("sp"), reg("sp"), int(48))
-        inst("ret")
+        inst(ArmInstruction.Ldp(reg("x29"), reg("x30"), lst(reg("sp"), int(32))))
+        inst(ArmInstruction.Binary("add", reg("sp"), reg("sp"), int(48)))
+        inst(ArmInstruction.Ret())
         newline()
     }
-
-    private fun inst(mnemo: String, vararg params: InstructionParameter) =
-        inst(AsmInstruction(mnemo, params.toMutableList()))
 
     private fun inst(i: InstructionOrLabel): InstructionOrLabel {
         last.next = i
