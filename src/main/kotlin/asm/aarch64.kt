@@ -72,7 +72,7 @@ sealed class InstructionOrLabel {
     var next: InstructionOrLabel? = null
 }
 
-open class ArmInstruction(val mnemo: String, val params: MutableList<InstructionParameter> = mutableListOf()) :
+sealed class ArmInstruction(val mnemo: String, val params: MutableList<InstructionParameter> = mutableListOf()) :
     InstructionOrLabel() {
 
     constructor(mnemo: String, vararg params: InstructionParameter) : this(mnemo, params.toMutableList())
@@ -82,33 +82,182 @@ open class ArmInstruction(val mnemo: String, val params: MutableList<Instruction
 
     class Nop : ArmInstruction("nop")
 
-    class Branch(label: Id) : ArmInstruction("b", label)
+    class Branch(label: Id) : ArmInstruction("b", label) {
+        var label: Id
+            get() = params[0] as Id
+            set(value) {
+                params[0] = value
+            }
+    }
 
-    class CondBranch(cc: String, label: Id) : ArmInstruction("b.$cc", label)
+    class CondBranch(cc: String, label: Id) : ArmInstruction("b.$cc", label) {
+        var condition: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
 
-    class Cbnz(condition: InstructionParameter, label: Id) : ArmInstruction("cbnz", condition, label)
+        var label: Id
+            get() = params[0] as Id
+            set(value) {
+                params[0] = value
+            }
+    }
 
-    class Cmp(left: InstructionParameter, right: InstructionParameter) : ArmInstruction("cmp", left, right)
+    class Cbnz(condition: InstructionParameter, label: Id) : ArmInstruction("cbnz", condition, label) {
+        var condition: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
 
-    class Cset(target: InstructionParameter, cc: Id) : ArmInstruction("cset", target, cc)
+        var label: Id
+            get() = params[0] as Id
+            set(value) {
+                params[0] = value
+            }
 
-    class Ldr(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("ldr", target, source)
-    class Str(source: InstructionParameter, target: InstructionParameter) : ArmInstruction("str", source, target)
+    }
+
+    class Cmp(left: InstructionParameter, right: InstructionParameter) : ArmInstruction("cmp", left, right) {
+        var left: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+
+        var right: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+    }
+
+    class Cset(target: InstructionParameter, cc: Id) : ArmInstruction("cset", target, cc) {
+        var target: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+    }
+
+    class Ldr(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("ldr", target, source) {
+        var target: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+
+        var source: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+    }
+
+    class Str(source: InstructionParameter, target: InstructionParameter) : ArmInstruction("str", source, target) {
+        var source: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+        var target: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+
+    }
 
     class Binary(mnemo: String, target: InstructionParameter, left: InstructionParameter, right: InstructionParameter) :
-        ArmInstruction(mnemo, target, left, right)
+        ArmInstruction(mnemo, target, left, right) {
+        var target: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
 
-    class Mov(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("mov", target, source)
+        var left: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+        var right: InstructionParameter
+            get() = params[2]
+            set(value) {
+                params[2] = value
+            }
+
+
+    }
+
+    class Mov(target: InstructionParameter, source: InstructionParameter) : ArmInstruction("mov", target, source) {
+        var target: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+
+        var source: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+    }
 
     class Bl(label: Id) : ArmInstruction("bl", label)
 
-    class Adrp(target: InstructionParameter, label: Id) : ArmInstruction("adrp", target, label)
+    class Adrp(target: InstructionParameter, label: Id) : ArmInstruction("adrp", target, label) {
+        var target: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+    }
 
     class Stp(regLeft: InstructionParameter, regRight: InstructionParameter, target: InstructionParameter) :
-        ArmInstruction("stp", regLeft, regRight, target)
+        ArmInstruction("stp", regLeft, regRight, target) {
+        var regLeft: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+        var regRight: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+        var target: InstructionParameter
+            get() = params[2]
+            set(value) {
+                params[2] = value
+            }
+    }
 
     class Ldp(regLeft: InstructionParameter, regRight: InstructionParameter, source: InstructionParameter) :
-        ArmInstruction("ldp", regLeft, regRight, source)
+        ArmInstruction("ldp", regLeft, regRight, source) {
+        var regLeft: InstructionParameter
+            get() = params[0]
+            set(value) {
+                params[0] = value
+            }
+        var regRight: InstructionParameter
+            get() = params[1]
+            set(value) {
+                params[1] = value
+            }
+
+        var source: InstructionParameter
+            get() = params[2]
+            set(value) {
+                params[2] = value
+            }
+    }
 
     class Ret : ArmInstruction("ret")
 }
