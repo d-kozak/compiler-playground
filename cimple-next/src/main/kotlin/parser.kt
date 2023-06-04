@@ -3,13 +3,13 @@ class Parser(input: String) {
 
 
     fun parse(fileName: String): FileNode {
-        val statements = mutableListOf<Statement>()
+        val statements = mutableListOf<StatementNode>()
         while (!lexer.isEmpty())
             statements.add(parseStatement())
         return FileNode(fileName, statements)
     }
 
-    private fun parseStatement(): Statement {
+    private fun parseStatement(): StatementNode {
         return when (val next = lexer.next()) {
             is IdentifierToken -> parseAssignment(next.name)
             is PrintToken -> parsePrint()
@@ -17,30 +17,30 @@ class Parser(input: String) {
         }
     }
 
-    private fun parseAssignment(target: Identifier): Assignment {
+    private fun parseAssignment(target: Identifier): AssignmentNode {
         eat("Expecting equals") { it is EqualsToken }
         val expr = parseExpression()
-        return Assignment(target, expr)
+        return AssignmentNode(target, expr)
     }
 
-    private fun parseExpression(): Expression {
+    private fun parseExpression(): ExpressionNode {
         var left = parseLitOrVar()
         while (lexer.peek() is PlusToken) {
             assert(lexer.next() is PlusToken)
             val right = parseLitOrVar()
-            left = Add(left, right)
+            left = AddNode(left, right)
         }
         return left
     }
 
-    private fun parseLitOrVar(): Expression = when (val next = lexer.next()) {
-        is IdentifierToken -> VariableLoad(next.name)
-        is IntToken -> LiteralExpression(next.value)
+    private fun parseLitOrVar(): ExpressionNode = when (val next = lexer.next()) {
+        is IdentifierToken -> VariableLoadNode(next.name)
+        is IntToken -> LiteralNode(Constant(next.value))
         else -> parseError("Expecting id or int.")
     }
 
     private fun parsePrint() = when (val variable = lexer.next()) {
-        is IdentifierToken -> Print(variable.name)
+        is IdentifierToken -> PrintNode(variable.name)
         else -> parseError("Bad print statement.")
     }
 

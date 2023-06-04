@@ -1,35 +1,45 @@
 sealed interface AstNode
 
-typealias Identifier = String
+sealed interface IdentifierOrConstant
+data class Identifier(val name: String) : IdentifierOrConstant {
+    override fun toString(): String = name
+}
+
+data class Constant(val value: Long) : IdentifierOrConstant {
+    override fun toString(): String = value.toString()
+}
+
+val INVALID_ID = Identifier("INVALID")
+
 
 class FileNode(
     val fileName: String,
-    val statements: MutableList<Statement>
+    val statements: MutableList<StatementNode>
 ) : AstNode
 
-sealed interface Statement : AstNode
+sealed interface StatementNode : AstNode
 
-class Assignment(
+class AssignmentNode(
     val target: Identifier,
-    val expression: Expression
-) : Statement
+    val expression: ExpressionNode
+) : StatementNode
 
-class Print(
+class PrintNode(
     val source: Identifier
-) : Statement
+) : StatementNode
 
 
-sealed interface Expression : AstNode
+sealed interface ExpressionNode : AstNode
 
-class LiteralExpression(
-    val value: Long
-) : Expression
+class LiteralNode(
+    val value: Constant
+) : ExpressionNode
 
-class VariableLoad(
+class VariableLoadNode(
     val source: Identifier
-) : Expression
+) : ExpressionNode
 
-class Add(
-    val left: Expression,
-    val right: Expression
-) : Expression
+class AddNode(
+    val left: ExpressionNode,
+    val right: ExpressionNode
+) : ExpressionNode

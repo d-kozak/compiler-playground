@@ -17,7 +17,7 @@ class AstVizInfo(
     }
 }
 
-fun serialize(root: FileNode): String = AstViz().serialize(root)
+fun serializeAst(root: FileNode): String = AstViz().serialize(root)
 
 private class AstViz {
 
@@ -33,19 +33,19 @@ private class AstViz {
 
     private fun buildVizTree(node: AstNode): AstVizInfo = when (node) {
         is FileNode -> nextNode("File: ${node.fileName}", node.statements.map { buildVizTree(it) })
-        is Statement -> {
+        is StatementNode -> {
             when (node) {
-                is Assignment -> nextNode("=", nextNode(node.target), buildVizTree(node.expression))
+                is AssignmentNode -> nextNode("=", nextNode(node.target.name), buildVizTree(node.expression))
 
-                is Print -> nextNode("print", nextNode(node.source))
+                is PrintNode -> nextNode("print", nextNode(node.source.name))
             }
         }
 
-        is Expression -> {
+        is ExpressionNode -> {
             when (node) {
-                is Add -> nextNode("+", buildVizTree(node.left), buildVizTree(node.right))
-                is LiteralExpression -> nextNode(node.value.toString())
-                is VariableLoad -> nextNode(node.source)
+                is AddNode -> nextNode("+", buildVizTree(node.left), buildVizTree(node.right))
+                is LiteralNode -> nextNode(node.value.toString())
+                is VariableLoadNode -> nextNode(node.source.name)
             }
         }
     }
@@ -56,9 +56,9 @@ private class AstViz {
         for (node in nodes) {
             append("n")
             append(node.id)
-            append("[(")
+            append("([")
             append(node.desc)
-            appendLine(")]")
+            appendLine("])")
         }
         for (node in nodes) {
             for (child in node.children) {
@@ -72,3 +72,12 @@ private class AstViz {
     }
 }
 
+fun serializeIr(ir: IrFunction): String = buildString {
+    for (instruction in ir.instructions) {
+        when (instruction) {
+            is Add -> appendLine("add ${instruction.target}, ${instruction.left}, ${instruction.right}")
+            is Mov -> appendLine("mov ${instruction.target}, ${instruction.source}")
+            is Print -> appendLine("print ${instruction.source}")
+        }
+    }
+}

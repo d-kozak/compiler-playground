@@ -65,7 +65,7 @@ class Lexer(val input: String) {
         pos = curr
         return when (str) {
             "print" -> PrintToken()
-            else -> IdentifierToken(str)
+            else -> IdentifierToken(Identifier(str))
         }
     }
 
