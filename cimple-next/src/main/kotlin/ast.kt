@@ -1,12 +1,13 @@
-interface Ast
+sealed interface AstNode
 
 typealias Identifier = String
 
 class FileNode(
-    val statement: MutableList<Statement>
-) : Ast
+    val fileName: String,
+    val statements: MutableList<Statement>
+) : AstNode
 
-sealed interface Statement : Ast
+sealed interface Statement : AstNode
 
 class Assignment(
     val target: Identifier,
@@ -18,7 +19,7 @@ class Print(
 ) : Statement
 
 
-sealed interface Expression : Ast
+sealed interface Expression : AstNode
 
 class LiteralExpression(
     val value: Long

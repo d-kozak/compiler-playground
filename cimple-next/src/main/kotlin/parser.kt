@@ -2,11 +2,11 @@ class Parser(input: String) {
     private val lexer = Lexer(input)
 
 
-    fun parse(): FileNode {
+    fun parse(fileName: String): FileNode {
         val statements = mutableListOf<Statement>()
         while (!lexer.isEmpty())
             statements.add(parseStatement())
-        return FileNode(statements)
+        return FileNode(fileName, statements)
     }
 
     private fun parseStatement(): Statement {
