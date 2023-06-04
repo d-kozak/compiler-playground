@@ -13,6 +13,7 @@ fun compileFile(file: File) {
     val parser = Parser(content)
     val ast = parser.parse(file.name)
     val ir = astToIr(ast)
+    irInterpreter(ir)
     val serialized = mermaidSerialize(content, ast, ir)
     File("${file.name}.out.md").printWriter().use {
         it.println(serialized)

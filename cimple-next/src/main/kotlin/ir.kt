@@ -51,3 +51,31 @@ fun astToIr(ast: FileNode): IrFunction {
     }
     return IrFunction(instructions)
 }
+
+
+fun irInterpreter(irFunction: IrFunction) {
+    val scope = mutableMapOf<Identifier, Long>()
+
+    fun lookup(x: IdentifierOrConstant): Long = when (x) {
+        is Constant -> x.value
+        is Identifier -> scope[x] ?: error("Unknown id $x")
+    }
+
+    for (instruction in irFunction.instructions) {
+        when (instruction) {
+            is Add -> {
+                val left = lookup(instruction.left)
+                val right = lookup(instruction.right)
+                scope[instruction.target] = left + right
+            }
+
+            is Mov -> {
+                scope[instruction.target] = lookup(instruction.source)
+            }
+
+            is Print -> {
+                println(scope[instruction.source])
+            }
+        }
+    }
+}
